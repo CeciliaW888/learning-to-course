@@ -6,6 +6,102 @@ This is not a "nice to have" — it's a gate. If any check fails, fix it before 
 
 ---
 
+## Quick Gotchas Reference
+
+**Scan this section before delivery. These are the most common failure points.**
+
+### Visual Density Errors
+
+- Do not leave walls of text without visual breaks (>3 paragraphs without an image, diagram, or interactive element)
+- Every screen must be at least 50% visual content
+- Convert bullet point lists to cards or visual grids
+- Replace long explanations with diagrams where possible
+- Fix: Convert to step cards, icon rows, pattern cards, or diagrams
+- Fix: Break text blocks at 2-3 sentences max, insert visuals between them
+
+### Tooltip Issues
+
+- Do not under-tooltip: define technical terms non-experts won't know
+- Watch for tooltips clipped by parent containers with `overflow: hidden`
+- Do not assume the learner remembers a term defined three days ago
+- Fix: Use `position: fixed` tooltips appended to `document.body`
+- Fix: When in doubt, add a tooltip — over-definition beats under-definition
+- Fix: Re-define terms on first use per section, not just per course
+
+### Quiz Design Flaws
+
+- No memory-based questions ("What does API stand for?")
+- No syntax recall ("What's the correct import statement?")
+- No true/false questions with no practical context
+- Every answer (correct and incorrect) must have an explanation
+- Fix: Scenario-based questions ("User reports X, where do you look?")
+- Fix: Decision-making questions ("Which approach and why?")
+- Fix: Encouraging tone — "Good instinct, but..." not "Wrong."
+
+### Code Block Issues
+
+- Do not modify code snippets to fit (readers can't find them in real files)
+- Avoid horizontal scrolling in code blocks (breaks reading flow)
+- No pseudo-code disguised as real code
+- Always use language tags on code blocks (for syntax highlighting)
+- Do not truncate long functions with "..." — pick a shorter one
+- Fix: Select naturally short code sections (5-15 lines)
+- Fix: Use `white-space: pre-wrap` (handled by pre-built styles.css)
+- Fix: Always use real, runnable code with language-tagged fences
+
+### Metaphor Mistakes
+
+- Do not reuse the same metaphor across different sections
+- Avoid default "restaurant" analogy for APIs, "library" for databases
+- Each concept gets a unique, inevitable-feeling metaphor
+- Test the metaphor — does it hold up or create misconceptions?
+
+### Scroll & Navigation
+
+- Never use `scroll-snap-type: y mandatory` (traps users) — use `proximity` instead
+- Ensure keyboard navigation works (pre-built main.js handles arrow keys)
+- Include a section nav or progress indicator for long pages
+
+### PWA Issues
+
+- Always await async cache operations in service worker (`caches.match()` returns a Promise)
+- Include all icon files in pre-cache list
+- Include Apple meta tags for iOS (`apple-touch-icon`, `apple-mobile-web-app-capable`)
+- Verify every file in `sw.js` PRECACHE_ASSETS actually exists
+- Use pre-built `templates/_base.html` which includes all PWA boilerplate
+
+### Content Generation
+
+- Do not write all daily guides in one pass (quality degrades in later days)
+- No placeholder content ("TODO: add exercises here")
+- Every daily guide needs all 8 mandatory sections
+- Core Concepts section must be 800+ words
+- Always start sections with "why should I care?" motivation
+- Fix: Generate in batches, verify completeness before delivery
+
+### Resource Links
+
+- Never use LLM-generated YouTube video IDs (they look plausible but 404)
+- Avoid deep doc links that break when docs restructure
+- Verify all links before inclusion
+- Copy exact oEmbed title and author — never paraphrase
+- Check for duplicate videos across sections
+
+### Placeholder Remnants
+
+- Replace all `YOUR_USERNAME`, `YOUR_REPO`, `USER/REPO` with actual values
+- Check for `your-email@example.com` or `example.com` in config files
+- Run `grep -r "YOUR_\|your-username\|your-repo" .` — must return empty
+
+### Diagram Paths
+
+- Exports go in `website/diagrams/`, not `diagrams/`
+- HTML uses `src="diagrams/file.svg"` (relative to website/)
+- Never use `../diagrams/` (parent path) or absolute `/diagrams/` paths
+- Every `.excalidraw` source file needs a corresponding SVG export
+
+---
+
 ## 1. Video Link Verification (CRITICAL) 🎥
 
 **Why:** LLM-generated YouTube video IDs are almost always wrong. They look plausible but link to nonexistent or completely unrelated videos. This is the #1 source of broken courses.

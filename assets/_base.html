@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>COURSE_TITLE</title>
+  <meta name="description" content="COURSE_DESCRIPTION">
+  <meta name="theme-color" content="#c4825a">
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <!-- Fonts: Crimson Pro (headings), Inter (body), JetBrains Mono (code) -->
+  <!-- For Chinese: add Noto Serif SC -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- CUSTOMIZE: Override accent color palette
+       Options: terracotta (default), coral, teal, amber, forest
+
+       Terracotta: #c4825a / #b07149 / rgba(196,130,90,0.12) / rgba(196,130,90,0.06)
+       Coral:      #D94F30 / #C4432A / rgba(217,79,48,0.12) / rgba(217,79,48,0.06)
+       Teal:       #2A7B9B / #236A86 / rgba(42,123,155,0.12) / rgba(42,123,155,0.06)
+       Amber:      #B8860B / #9E7309 / rgba(184,134,11,0.12) / rgba(184,134,11,0.06)
+       Forest:     #4a7c59 / #3d6849 / rgba(74,124,89,0.12) / rgba(74,124,89,0.06)
+  -->
+  <style>
+    :root {
+      --color-accent: ACCENT_COLOR;
+      --color-accent-hover: ACCENT_HOVER;
+      --color-accent-light: ACCENT_LIGHT;
+      --color-accent-muted: ACCENT_MUTED;
+    }
+  </style>
+
+  <script src="main.js" defer></script>
+</head>
+<body>
+  <!-- Skip to content -->
+  <a href="#main" class="skip-link">Skip to content</a>
+
+  <!-- Navigation -->
+  <nav class="nav" id="nav">
+    <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    <div class="nav-inner">
+      <span class="nav-title">COURSE_TITLE</span>
+      <div class="nav-dots" id="nav-dots" role="tablist">
+        <!-- One button per module/day: -->
+        <!-- <button class="nav-dot" data-target="module-1" data-tooltip="Day 1: Topic" role="tab">1</button> -->
+        NAV_DOTS
+      </div>
+    </div>
+  </nav>
+
+  <!-- Install Banner (PWA) -->
+  <div class="install-banner" id="install-banner" style="display:none;">
+    <p>📱 Install this course for offline access</p>
+    <button class="install-btn" id="install-btn">Install</button>
+    <button class="install-dismiss" id="install-dismiss">✕</button>
+  </div>
+
+  <main id="main">
+    <!-- Module/day content inserted by build.sh -->

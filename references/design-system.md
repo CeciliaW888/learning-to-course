@@ -1,5 +1,7 @@
 # Design System
 
+> **Note:** These tokens are implemented in `assets/styles.css`. This file documents the design decisions; the CSS is the source of truth.
+
 Visual language for learning-to-course websites. Warm, inviting, not the typical purple-gradient AI look.
 
 ## Color Palette

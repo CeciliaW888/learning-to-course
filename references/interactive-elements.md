@@ -2,6 +2,31 @@
 
 Patterns for quizzes, animations, visualizations, and daily guide structures in learning-to-course websites.
 
+## Table of Contents
+
+- [Daily Study Guide Patterns](#daily-study-guide-patterns)
+- [Quiz Types](#quiz-types)
+- [Flashcard Types](#flashcard-types)
+- [Progress Tracking](#progress-tracking)
+- [Animations](#animations)
+- [Excalidraw Diagram Patterns](#excalidraw-diagram-patterns)
+- [Visualizations](#visualizations)
+- [Keyboard Navigation](#keyboard-navigation)
+- [Mobile Gestures](#mobile-gestures)
+- [Accessibility](#accessibility)
+- [PWA (Progressive Web App)](#pwa-progressive-web-app)
+- [Data Export](#data-export)
+- [Code / English Translation Blocks](#code--english-translation-blocks)
+- [Glossary Tooltips](#glossary-tooltips)
+- [Chat Animation](#chat-animation)
+- [Data Flow Animation](#data-flow-animation)
+- [Callout Boxes](#callout-boxes)
+- [Spot-the-Bug Challenge](#spot-the-bug-challenge)
+- [Visual File Tree](#visual-file-tree)
+- [Step Cards](#step-cards)
+- [Layer Toggle](#layer-toggle)
+- [Auto-Initialization Reference](#auto-initialization-reference)
+
 ---
 
 ## Daily Study Guide Patterns
@@ -1441,3 +1466,307 @@ function exportToAnki() {
   downloadFile('flashcards.csv', csv);
 }
 ```
+
+---
+
+## Code ↔ English Translation Blocks
+
+**Purpose:** Side-by-side real code with plain-English explanations. Most important interactive element for teaching code concepts.
+
+**HTML Pattern:**
+```html
+<div class="translation-block">
+  <div class="translation-code">
+    <div class="code-header">
+      <span class="filename">example.py</span>
+      <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+    </div>
+    <pre><code class="language-python">
+<span class="code-keyword">from</span> langchain <span class="code-keyword">import</span> AgentExecutor
+<span class="code-function">agent</span> = create_react_agent(llm, tools)
+result = agent.<span class="code-function">invoke</span>({<span class="code-string">"input"</span>: query})
+    </code></pre>
+  </div>
+  <div class="translation-english">
+    <div class="translation-line">Import the agent runner from the framework</div>
+    <div class="translation-line">Create an agent that can reason and act using our AI model and tools</div>
+    <div class="translation-line">Run the agent with the user's question and get back the answer</div>
+  </div>
+</div>
+```
+
+**Key Rules:**
+- Code is always real, unmodified project code — never pseudo-code
+- Each English line maps to 1-2 code lines
+- Focus on "why" not "what" — explain intent, not syntax
+- Stacks vertically on mobile (≤768px)
+- At least one per module/day for technical courses
+
+---
+
+## Glossary Tooltips
+
+**Purpose:** Define technical terms inline without leaving the page. Mandatory on every technical term at first use per section.
+
+**HTML Pattern:**
+```html
+<span class="term" data-definition="A pattern where the AI reasons about what to do, then takes action, in a loop until the task is done.">ReAct pattern</span>
+```
+
+**Implementation Notes:**
+- Pre-built main.js auto-initializes on `.term[data-definition]` elements
+- Tooltip uses `position: fixed` appended to `document.body` (prevents clipping)
+- Desktop: hover to show. Mobile: tap to toggle
+- Arrow flips direction when near viewport edge
+- Define EVERY technical term, acronym, and software name on first use per section
+- When in doubt, add a tooltip — over-definition is better than under-definition
+- For bilingual courses: `<span class="term" data-definition="推理与行动结合的模式">ReAct pattern</span>`
+
+---
+
+## Chat Animation
+
+**Purpose:** iMessage-style conversations between system components ("cast of characters").
+
+**HTML Pattern:**
+```html
+<div class="chat-window" id="chat-example">
+  <div class="chat-messages">
+    <div class="chat-message" data-msg="1" data-sender="frontend" style="display:none;">
+      Hey API, user just clicked "Save" — here's the form data 📦
+    </div>
+    <div class="chat-message" data-msg="2" data-sender="api" style="display:none;">
+      Got it! Let me validate this... looks good ✅
+    </div>
+    <div class="chat-message" data-msg="3" data-sender="database" style="display:none;">
+      Saved! Row ID #42 created. Tell the user we're done 👍
+    </div>
+    <div class="chat-typing" style="display:none;">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+  <div class="chat-controls">
+    <button class="chat-next-btn">Next Message</button>
+    <button class="chat-all-btn">Show All</button>
+    <button class="chat-reset-btn">Reset</button>
+  </div>
+</div>
+```
+
+**Key Rules:**
+- Auto-initializes on `.chat-window` elements (needs unique `id`)
+- Messages appear sequentially with typing indicator between them
+- Different `data-sender` values get different bubble colors (via actor colors in CSS)
+- Use conversational, personality-driven language — components are characters
+- At least one chat animation per course (mandatory)
+
+---
+
+## Data Flow Animation
+
+**Purpose:** Step-by-step visualization of data moving through a system.
+
+**HTML Pattern:**
+```html
+<div class="flow-animation" data-steps='[
+  {"highlight": "flow-actor-1", "label": "User clicks Submit", "packet": "📦", "from": "flow-actor-1", "to": "flow-actor-2"},
+  {"highlight": "flow-actor-2", "label": "API validates the data", "packet": "✅", "from": "flow-actor-2", "to": "flow-actor-3"},
+  {"highlight": "flow-actor-3", "label": "Database stores the record", "packet": "💾", "from": "flow-actor-3", "to": "flow-actor-2"}
+]'>
+  <div class="flow-actors">
+    <div class="flow-actor" id="flow-actor-1">🖥️ Frontend</div>
+    <div class="flow-actor" id="flow-actor-2">⚡ API</div>
+    <div class="flow-actor" id="flow-actor-3">🗄️ Database</div>
+  </div>
+  <div class="flow-packet"></div>
+  <div class="flow-step-label"></div>
+  <div class="flow-controls">
+    <button class="flow-next-btn">Next Step</button>
+    <button class="flow-play-btn">Play All</button>
+    <button class="flow-reset-btn">Reset</button>
+  </div>
+</div>
+```
+
+**Key Rules:**
+- Auto-initializes on `.flow-animation` elements
+- Steps passed as JSON in `data-steps` attribute
+- ⚠️ CRITICAL: Single quotes in step labels break JSON parsing (attribute uses single-quote delimiters). Use `&apos;` or rewrite without apostrophes.
+- Actor IDs must match `from`/`to` values in steps
+- At least one flow animation per course (mandatory for any topic with data movement)
+
+---
+
+## Callout Boxes
+
+**Purpose:** Highlight "aha moments" and key insights. Maximum 2 per section/module.
+
+**HTML Patterns:**
+```html
+<!-- Insight callout (accent color) -->
+<div class="callout-accent">
+  <span class="callout-icon">💡</span>
+  <div class="callout-content">
+    <strong>Key Insight:</strong> This pattern appears in almost every web framework —
+    once you understand it here, you'll recognize it everywhere.
+  </div>
+</div>
+
+<!-- Info callout (teal) -->
+<div class="callout-info">
+  <span class="callout-icon">ℹ️</span>
+  <div class="callout-content">
+    <strong>Good to know:</strong> This is optional but commonly used in production.
+  </div>
+</div>
+
+<!-- Warning callout (red) -->
+<div class="callout-warning">
+  <span class="callout-icon">⚠️</span>
+  <div class="callout-content">
+    <strong>Common mistake:</strong> Don't confuse authentication with authorization —
+    they're different steps.
+  </div>
+</div>
+```
+
+---
+
+## Spot-the-Bug Challenge
+
+**Purpose:** Students identify a deliberate bug in code.
+
+**HTML Pattern:**
+```html
+<div class="bug-challenge">
+  <h4>🐛 Find the Bug</h4>
+  <p>This code should fetch user data, but something's wrong. Click the buggy line:</p>
+  <div class="bug-code">
+    <div class="bug-line" data-line="1" onclick="checkBugLine(this, false)">
+      <span class="line-num">1</span> const response = await fetch('/api/users');
+    </div>
+    <div class="bug-line" data-line="2" onclick="checkBugLine(this, true)">
+      <span class="line-num">2</span> const data = response.json();
+    </div>
+    <div class="bug-line" data-line="3" onclick="checkBugLine(this, false)">
+      <span class="line-num">3</span> return data.users;
+    </div>
+  </div>
+  <div class="bug-feedback" style="display:none;">
+    Missing <code>await</code>! <code>response.json()</code> returns a Promise,
+    so without <code>await</code>, <code>data</code> would be a Promise object, not actual data.
+  </div>
+</div>
+```
+
+---
+
+## Visual File Tree
+
+**Purpose:** Show directory structures with descriptions. More scannable than text listings.
+
+**HTML Pattern:**
+```html
+<div class="file-tree">
+  <div class="ft-folder">
+    <span class="ft-name">📁 src/</span>
+    <span class="ft-desc">Main source code</span>
+    <div class="ft-children">
+      <div class="ft-folder">
+        <span class="ft-name">📁 components/</span>
+        <span class="ft-desc">Reusable UI pieces</span>
+        <div class="ft-children">
+          <div class="ft-file">
+            <span class="ft-name">📄 Button.jsx</span>
+            <span class="ft-desc">All button variants</span>
+          </div>
+        </div>
+      </div>
+      <div class="ft-file">
+        <span class="ft-name">📄 App.jsx</span>
+        <span class="ft-desc">Main entry point — everything starts here</span>
+      </div>
+    </div>
+  </div>
+</div>
+```
+
+---
+
+## Step Cards
+
+**Purpose:** Sequential processes as visual cards instead of numbered paragraphs.
+
+**HTML Pattern:**
+```html
+<div class="step-cards">
+  <div class="step-card">
+    <span class="step-num">1</span>
+    <div class="step-body">
+      <strong>User submits the form</strong>
+      <p>The browser collects all form fields and sends them as a POST request to the API server.</p>
+    </div>
+  </div>
+  <div class="step-card">
+    <span class="step-num">2</span>
+    <div class="step-body">
+      <strong>API validates the data</strong>
+      <p>The server checks required fields, data types, and business rules before proceeding.</p>
+    </div>
+  </div>
+</div>
+```
+
+---
+
+## Layer Toggle
+
+**Purpose:** Show how layers build on each other (HTML → CSS → JS, or data → logic → UI).
+
+**HTML Pattern:**
+```html
+<div class="layer-toggle">
+  <div class="layer-tabs">
+    <button class="layer-tab active" onclick="showLayer('html-only')">HTML Only</button>
+    <button class="layer-tab" onclick="showLayer('with-css')">+ CSS</button>
+    <button class="layer-tab" onclick="showLayer('with-js')">+ JavaScript</button>
+  </div>
+  <div class="layer-viewport">
+    <div class="layer active" id="html-only">
+      <!-- Plain HTML content / screenshot -->
+    </div>
+    <div class="layer" id="with-css">
+      <!-- Styled version -->
+    </div>
+    <div class="layer" id="with-js">
+      <!-- Interactive version -->
+    </div>
+  </div>
+  <p class="layer-desc" id="layer-desc">Raw HTML structure — no styling applied yet.</p>
+</div>
+```
+
+---
+
+## Auto-Initialization Reference
+
+The pre-built `main.js` auto-initializes these elements on page load. No manual JS needed in module HTML files.
+
+| Element | Trigger | Required Attributes |
+|---------|---------|-------------------|
+| Glossary tooltip | `.term` | `data-definition` |
+| Chat animation | `.chat-window` | Unique `id`, messages with `data-msg` + `data-sender` |
+| Data flow | `.flow-animation` | `data-steps` JSON array |
+| Quiz | `.quiz-card` | Options with `data-correct`, `data-explanation-*` |
+| Flashcard | `.flashcard` | `.flashcard-front` + `.flashcard-back` children |
+| Drag-and-drop | `.dnd-container` | Chips with `data-answer`, zones with `data-correct` |
+| Scroll animation | `.animate-in` | None (optional `--stagger-delay` on children) |
+| Progress tracking | `[data-day]` sections | `data-day` attribute |
+
+**Functions available on `window` (for inline onclick handlers):**
+- `copyCode(btn)` — copy code block to clipboard
+- `checkQuiz(containerId)` — validate quiz answers
+- `resetQuiz(containerId)` — clear quiz selections
+- `checkBugLine(element, isCorrect)` — check spot-the-bug answer
+- `showLayer(id)` — switch layer toggle view
+- `showArchDesc(element)` — show architecture component description

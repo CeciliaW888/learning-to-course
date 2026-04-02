@@ -315,3 +315,126 @@ Every daily guide MUST have navigation at top and bottom:
 - Day 1: no "Previous" link
 - Last day: no "Next" link
 - Always include "Course Home" link
+
+---
+
+## Day Brief Template (Parallel Generation)
+
+Use this template when generating courses with 10+ days. Write one brief per day, then dispatch to subagents for parallel generation.
+
+### Purpose
+
+Each brief provides a subagent everything needed to write ONE daily guide + its website module HTML, without access to source research or other days' content.
+
+### Template
+
+---
+
+#### Day [N]: [Topic Title]
+
+**Week:** [Week number]
+**Difficulty:** Beginner / Intermediate / Advanced
+**Estimated study time:** [30 min / 1 hour / 2 hours]
+
+##### Teaching Arc
+
+- **Metaphor:** [Everyday metaphor that grounds this concept — must be unique, never reused]
+- **Opening hook:** [1-2 sentences connecting to learner's experience or previous day]
+- **Key insight:** [The single most important takeaway]
+- **Practical relevance:** [Why this matters — how it helps the learner's stated goal]
+
+##### Learning Objectives (3-5)
+
+1. [Measurable objective using action verbs: explain, implement, compare, analyze]
+2. ...
+3. ...
+
+##### Core Concepts Outline
+
+- **Concept 1:** [Topic] — [2-3 sentence summary of what to cover, key points]
+- **Concept 2:** [Topic] — [2-3 sentence summary]
+- **Concept 3:** [Topic] — [2-3 sentence summary]
+- Target: 800-1200 words total for Core Concepts section
+
+##### Pre-Researched Resources
+
+Include verified resources so the subagent doesn't need to search:
+
+- **Video:** [Title] by [Author] — https://youtube.com/watch?v=ID (oEmbed verified)
+- **Article:** [Title] — [URL] (web_fetch verified)
+- **Docs:** [Section name] — [URL] (web_fetch verified)
+
+##### Key Terminology (5-10 terms)
+
+| Term | Definition | Example |
+|------|-----------|---------|
+| [Term] | [Plain-language definition] | [Concrete example] |
+
+##### Code Examples to Include
+
+```[language]
+# Pre-selected code example (working, tested)
+# Include file context: filename, what it demonstrates
+```
+
+- **What it demonstrates:** [explanation]
+- **"Try it" prompt:** [what the learner should modify/experiment with]
+
+##### Exercise Ideas (3-5)
+
+1. **[Title]** (~X min, difficulty) — [Brief description of what the learner builds/does]
+2. ...
+
+##### Reflection Questions (3-5)
+
+1. [Open-ended question connecting today's content to learner's goals]
+2. ...
+
+##### Interactive Elements for Website Module
+
+Specify which interactive elements the website module should include:
+
+- [ ] Quiz (multiple-choice) — [topic/question idea]
+- [ ] Code / English translation block — [which code example]
+- [ ] Flashcards — [which terms]
+- [ ] Diagram — [which concept, SVG filename in website/diagrams/]
+- [ ] Chat animation — [which components/actors talk]
+- [ ] Data flow animation — [what flow to animate]
+- [ ] Callout box — [insight to highlight]
+
+##### Context from Adjacent Days
+
+- **Previous day covered:** [brief summary so transitions are smooth]
+- **Next day will cover:** [brief summary so "Next Steps" section is accurate]
+
+##### Reference Files Needed
+
+The subagent should read these sections:
+- `references/daily-guide-template.md` — full 8-section template (this file)
+- `references/interactive-elements.md` — [specific sections needed]
+- `references/quality-checklist.md` — gotchas and failure points to avoid
+
+---
+
+### Usage Guidelines
+
+#### When to use briefs
+- Courses with **10+ days** — parallel generation saves significant time
+- Complex topics where research is expensive — pre-research once, distribute
+
+#### When to skip briefs
+- Short courses (5-7 days) — sequential generation is fine
+- Simple topics — overhead of brief-writing exceeds time saved
+
+#### Dispatch strategy
+- Send 2-3 briefs per batch to subagents
+- Each subagent receives: its brief + referenced sections from references/
+- Each subagent produces: one day-XX-topic.md + one modules/XX-topic.html
+- Main agent does consistency check after all days are generated
+
+#### Brief quality checklist
+- [ ] All resources verified (oEmbed for videos, web_fetch for links)
+- [ ] Code examples tested and working
+- [ ] Metaphor is unique (not used in any other day's brief)
+- [ ] Objectives are measurable (action verbs, not "understand" or "learn about")
+- [ ] Adjacent day context filled in (for smooth transitions)

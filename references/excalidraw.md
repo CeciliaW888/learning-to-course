@@ -1,6 +1,217 @@
-# Excalidraw Diagram Templates
+# Excalidraw Diagrams
 
-Ready-to-use templates for course diagrams. Each template includes the Excalidraw JSON structure and MCP commands to generate it.
+Complete guide for creating, exporting, embedding, and templating Excalidraw diagrams in courses.
+
+## Table of Contents
+
+- [Dual Format Storage](#dual-format-storage)
+- [Creating Diagrams via Excalidraw MCP](#creating-diagrams-via-excalidraw-mcp)
+- [HTML Embed Template](#html-embed-template)
+- [Diagram CSS](#diagram-css)
+- [Automated Generation Workflow](#automated-generation-workflow)
+- [Diagram Types (Auto-Generated Per Course)](#diagram-types-auto-generated-per-course)
+- [Diagram Editing Guide](#diagram-editing-guide)
+- [Color Palette](#color-palette-consistent-across-all-diagrams)
+- [Template 1: Perceive-Decide-Act Loop](#1-perceive-decide-act-loop)
+- [Template 2: Agent vs Chatbot vs RAG Comparison](#2-agent-vs-chatbot-vs-rag-comparison)
+- [Template 3: Tool Calling Architecture](#3-tool-calling-architecture)
+- [Template 4: Multi-Agent Collaboration Network](#4-multi-agent-collaboration-network)
+- [Template 5: Concept Relationship Map (Weekly)](#5-concept-relationship-map-weekly)
+- [General Template Guidelines](#general-template-guidelines)
+- [Generating Diagrams Programmatically](#generating-diagrams-programmatically)
+
+---
+
+## Dual Format Storage
+
+```
+repo/
+├── diagrams/                    # Source files (editable, version controlled)
+│   ├── week-01-concept-map.excalidraw
+│   ├── week-01-pda-loop.excalidraw
+│   └── README.md                # How to edit diagrams
+├── website/
+│   └── diagrams/                # Exported files MUST be here
+│       ├── week-01-concept-map.svg
+│       ├── week-01-concept-map.png
+│       └── ...
+```
+
+**Why SVG preferred over PNG:**
+- Scalable — crisp at any zoom level, perfect for mobile
+- Smaller file size — typically 50-80% smaller than PNG
+- Searchable — text in SVGs is indexable and selectable
+- Accessible — screen readers can parse SVG content
+- Version-friendly — SVG diffs are human-readable in Git
+
+**Why dual format:**
+- `.excalidraw` files are JSON — easy to version control, diff, and edit
+- SVG exports are embedded in website HTML for fast loading and mobile support
+- PNG fallback for contexts that don't render SVG well
+
+---
+
+## Creating Diagrams via Excalidraw MCP
+
+**Prerequisites:** Excalidraw MCP server running (`http://localhost:3000`)
+
+**Step 1: Start the canvas**
+```bash
+cd ~/.agents/skills/excalidraw-mcp && npm start
+```
+
+**Step 2: Create diagram elements via MCP**
+```bash
+mcporter call excalidraw.create_element \
+  type=rectangle x:100 y:100 width:200 height:80 \
+  backgroundColor="#a5d8ff" text="Perceive" roundness:8
+
+mcporter call excalidraw.create_element \
+  type=arrow startX:300 startY:140 endX:400 endY:140 \
+  strokeColor="#495057"
+
+mcporter call excalidraw.get_canvas_screenshot
+```
+
+**Step 3: Export (SVG preferred)**
+```bash
+# Export as .excalidraw (source)
+mcporter call excalidraw.export_scene format=excalidraw \
+  outputPath="diagrams/week-01-pda-loop.excalidraw"
+
+# Export as SVG (preferred)
+mcporter call excalidraw.export_to_image format=svg \
+  outputPath="website/diagrams/week-01-pda-loop.svg"
+
+# Export as PNG (fallback)
+mcporter call excalidraw.export_to_image format=png \
+  outputPath="website/diagrams/week-01-pda-loop.png"
+```
+
+---
+
+## HTML Embed Template
+
+```html
+<figure class="diagram-container" data-diagram="pda-loop">
+  <img src="diagrams/week-01-pda-loop.svg"
+       alt="Perceive-Decide-Act Loop: Agent observes environment, LLM decides next action, executes tools, checks if goal achieved"
+       loading="lazy"
+       class="diagram-img" />
+  <figcaption>
+    <span class="diagram-caption">The Perceive-Decide-Act Loop</span>
+    <a href="https://github.com/USERNAME/REPO/blob/main/diagrams/week-01-pda-loop.excalidraw"
+       class="edit-diagram-link" target="_blank" rel="noopener">
+      Edit this diagram
+    </a>
+  </figcaption>
+</figure>
+```
+
+> Use `src="diagrams/file.svg"` — relative to `website/` where `index.html` lives.
+
+---
+
+## Diagram CSS
+
+**Responsive rendering:**
+```css
+.diagram-container {
+  max-width: 100%;
+  margin: var(--space-8) 0;
+  text-align: center;
+}
+
+.diagram-img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: white;
+}
+
+.edit-diagram-link {
+  display: inline-block;
+  margin-top: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  text-decoration: none;
+}
+
+.edit-diagram-link:hover {
+  color: var(--primary);
+}
+
+@media (max-width: 768px) {
+  .diagram-container {
+    margin: var(--space-4) calc(-1 * var(--space-4));
+  }
+  .diagram-img {
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+}
+```
+
+**Dark mode support:**
+```css
+@media (prefers-color-scheme: dark) {
+  .diagram-img {
+    filter: invert(0.88) hue-rotate(180deg);
+  }
+}
+```
+
+---
+
+## Automated Generation Workflow
+
+When building a course, auto-generate diagrams:
+
+1. **Analyze curriculum** — identify concepts that benefit from visual explanation
+2. **Generate .excalidraw source** — create diagram JSON with proper layout
+3. **Export to SVG (preferred) + PNG (fallback)** — render for website embedding
+4. **Copy exports to `website/diagrams/`** — NOT to `assets/diagrams/` or parent `diagrams/`
+5. **Embed in HTML** — insert `<figure>` blocks with `src="diagrams/file.svg"` paths
+6. **Create diagrams/README.md** — contribution guide for diagram improvements
+
+---
+
+## Diagram Types (Auto-Generated Per Course)
+
+Each course gets diagrams matched to its content. For AI/Agent courses:
+
+| Diagram | Purpose | When to Use |
+|---------|---------|-------------|
+| **Perceive-Decide-Act Loop** | Core agent cycle flowchart | Week 1: Foundations |
+| **Agent vs Chatbot vs RAG** | Comparison matrix with features | Week 1: Key Differences |
+| **Tool Calling Architecture** | How agents invoke external tools | Week 2: Tools & APIs |
+| **Multi-Agent Networks** | Agent collaboration patterns | Week 3: Advanced |
+| **Concept Relationship Map** | Weekly knowledge graph | Every week (auto) |
+
+For non-AI topics, generate topic-appropriate diagram types.
+
+---
+
+## Diagram Editing Guide
+
+Include in every repo's `diagrams/README.md`:
+
+1. **Edit source files** — Open `.excalidraw` files at excalidraw.com or via MCP
+2. **Keep it simple** — Max 8-10 elements per diagram
+3. **Use consistent colors** — Follow the course color palette
+4. **Add alt text** — Every diagram must have descriptive alt text in HTML
+5. **Export to SVG first** — SVG is preferred; add PNG only as fallback
+6. **Copy to website/diagrams/** — NOT `assets/diagrams/`
+7. **Re-export after editing** — Run export script to update SVG/PNG
+8. **PR with both formats** — Always commit both `.excalidraw` source AND exported images
+
+---
+
+# Ready-to-Use Diagram Templates
+
+Each template includes the Excalidraw JSON structure and MCP commands to generate it.
 
 ## Color Palette (Consistent Across All Diagrams)
 
@@ -385,12 +596,12 @@ mcporter call excalidraw.create_element \
 - **Labels on arrows:** Only when relationship isn't obvious
 
 ### Export Checklist
-1. ✅ All elements properly aligned and distributed
-2. ✅ No overlapping text
-3. ✅ Color palette matches design system
-4. ✅ Exported at both `.excalidraw` (source) and `.png` (website)
-5. ✅ Alt text written for HTML embed
-6. ✅ Mobile preview checked (diagram readable at 375px width)
+1. All elements properly aligned and distributed
+2. No overlapping text
+3. Color palette matches design system
+4. Exported at both `.excalidraw` (source) and `.svg` (website)
+5. Alt text written for HTML embed
+6. Mobile preview checked (diagram readable at 375px width)
 
 ---
 
