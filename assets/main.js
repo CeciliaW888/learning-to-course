@@ -306,6 +306,31 @@
     });
   }
 
+  /* Index-based quiz: data-correct="INDEX" on .quiz-card, data-explanation-N per option */
+  function initIndexQuizzes() {
+    document.querySelectorAll('.quiz-card[data-correct]').forEach(function (card) {
+      var correctIdx = parseInt(card.dataset.correct, 10);
+      if (isNaN(correctIdx) || card.classList.contains('index-quiz-init')) return;
+      card.classList.add('index-quiz-init');
+      var options = card.querySelectorAll('.quiz-option');
+      options.forEach(function (btn, idx) {
+        btn.addEventListener('click', function () {
+          if (card.classList.contains('answered')) return;
+          card.classList.add('answered');
+          btn.classList.add(idx === correctIdx ? 'correct' : 'incorrect');
+          if (idx !== correctIdx && options[correctIdx]) options[correctIdx].classList.add('correct');
+          var explanation = card.getAttribute('data-explanation-' + idx);
+          if (explanation) {
+            var expDiv = document.createElement('div');
+            expDiv.className = 'quiz-explanation-inline';
+            expDiv.textContent = (idx === correctIdx ? '\u2705 ' : '\u274c ') + explanation;
+            card.appendChild(expDiv);
+          }
+        });
+      });
+    });
+  }
+
   /* ------------------------------------------------------------------
      5. FLASHCARD ENGINE
      ------------------------------------------------------------------ */
@@ -857,6 +882,7 @@
     initAnimations();
     initGlossary();
     initQuizzes();
+    initIndexQuizzes();
     initFlashcards();
     initDragDrop();
     initChatWindows();

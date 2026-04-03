@@ -138,6 +138,12 @@ Every course website is a PWA. No exceptions. Required files: `manifest.json`, `
 - Include ALL icon files in pre-cache list
 - Default theme: `#c4825a` (terracotta) / `#f5f0eb` (warm cream)
 
+**Icon generation:** If the user doesn't provide icons, generate them programmatically:
+- Use Python + Pillow to create simple branded icons with the accent color
+- Required sizes: 192×192, 512×512 (regular), 192×192, 512×512 (maskable with full bleed), 180×180 (Apple touch)
+- Maskable icons must have the safe zone (80% center area) containing the design
+- Save to `website/icons/`
+
 See `references/pwa-setup.md` for complete implementation guide.
 
 ### Interactive Elements (Pre-built)
@@ -159,7 +165,30 @@ The pre-built main.js auto-initializes these elements by scanning for CSS classe
 
 See `references/interactive-elements.md` for HTML patterns and `assets/styles.css` for styling.
 
-## Website Build Process
+## Website Architecture
+
+### Option A: Scrollable single-page (courses with 7 or fewer days)
+Use the `build.sh` concatenation approach. All modules render as full-viewport sections in one scrollable page. Suitable for short courses where all content is manageable in a single scroll.
+
+### Option B: Tab-based layout (recommended for 10+ day courses)
+Create a self-contained `index.html` with inline CSS/JS that provides:
+- **Hero section** — course title, subtitle, tags, PWA install button
+- **Progress card** — day grid (7 columns x N rows), progress bar, week labels
+- **Sticky tab navigation** — Curriculum, Learning Content, Diagrams, Flashcards, Quiz, Resources
+- **Curriculum tab** — expandable week cards with day items linking to full guides
+- **Learning Content tab** — lazy-loads `modules/*.html` with interactive features from `styles.css`/`main.js`
+- **Quiz/Flashcard tabs** — load from `website/data/*.json`
+- **Resources tab** — curated external links
+
+This approach loads `styles.css` and `main.js` for interactive features while providing better navigation than a 21-screen scroll. See `references/tab-website-template.html` for the reference implementation.
+
+When using Option B:
+- The `build.sh` step is not needed in the GitHub Actions workflow
+- Module files in `modules/` are fetched dynamically when the Learning Content tab is activated
+- Override `.module { min-height: auto; }` since modules are embedded, not full-viewport (the CSS includes `.section .module` override for this)
+- After loading modules dynamically, call `initIndexQuizzes()` to re-initialize quiz handlers on the new DOM elements
+
+## Website Build Process (Option A)
 
 The PWA website uses a pre-built runtime. Do NOT generate CSS or JS from scratch.
 
@@ -176,6 +205,57 @@ The PWA website uses a pre-built runtime. Do NOT generate CSS or JS from scratch
    - NO <html>, <head>, <body>, <style>, or <script> tags
    - Use class names and data-* attributes documented in interactive-elements.md
 7. Run `cd website && bash build.sh` to assemble index.html
+
+**Module HTML must follow this exact structure:**
+
+```html
+<section class="module" id="module-N" data-module="Day N: Title">
+<div class="module-inner">
+
+  <h2>Day N: Title</h2>
+  <p class="module-meta">Difficulty · Estimated time: 1 hour</p>
+
+  <div class="step-cards">
+    <div class="step-card">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <strong>Concept title</strong>
+        <p>Explanation</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout-accent">
+    <strong>Key insight:</strong> Summary...
+  </div>
+
+  <h3>Code Example</h3>
+  <pre><code class="language-typescript">// code</code></pre>
+
+  <h3>Knowledge Check</h3>
+  <div class="quiz-card" data-correct="1" data-explanation-0="Wrong" data-explanation-1="Correct" data-explanation-2="Wrong">
+    <p class="quiz-question">Question?</p>
+    <div class="quiz-options">
+      <button class="quiz-option">A</button>
+      <button class="quiz-option">B (correct)</button>
+      <button class="quiz-option">C</button>
+    </div>
+  </div>
+
+  <h3>Key Terms</h3>
+  <p><span class="term" data-definition="Definition here">Term</span></p>
+
+</div>
+</section>
+```
+
+**Critical class names (CSS will break if wrong):**
+- `module-inner` — required wrapper inside every `<section class="module">`
+- `step-cards` — required wrapper around `step-card` elements
+- `step-num` — NOT `step-badge` or `step-number`
+- `step-body` — NOT a bare `<div>`, must have this class
+- `quiz-card` with `data-correct="INDEX"` — 0-based index of correct option
+- `data-explanation-N` — per-option explanation attributes on quiz-card
 
 ### Accent Color Palettes
 
@@ -206,6 +286,24 @@ Before delivery, replace ALL `YOUR_USERNAME`, `YOUR_REPO`, `USER/REPO` with actu
 
 See `references/quality-checklist.md` Section 2 for scripts.
 
+## GitHub Pages Deployment
+
+The `website/` directory is deployed as the site root. This means `../` paths will NOT resolve on the deployed site.
+
+**Rules:**
+- Quiz JSON, flashcard JSON, and any data files MUST be copied into `website/data/`
+- Day guide links MUST use absolute GitHub URLs: `https://github.com/USERNAME/REPO/blob/main/week-XX/day-XX-slug.md`
+- Diagram SVGs are fine — they live inside `website/diagrams/` already
+- The GitHub Actions workflow should deploy `website/` as the artifact path
+- Add `enablement: true` to `actions/configure-pages` to auto-enable Pages
+- Add a concurrency group to prevent deployment races:
+
+```yaml
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+```
+
 ## Quality Gates — MANDATORY
 
 Every course must pass before delivery:
@@ -215,6 +313,7 @@ Every course must pass before delivery:
 3. **Diagram paths** — exports in `website/diagrams/`, HTML uses relative paths
 4. **Daily guide completeness** — all days have 8 sections, 800+ word core concepts
 5. **Deployment readiness** — HTML loads, service worker registers, manifest valid
+6. **Quiz answer distribution** — correct answer positions must vary across questions. No single index should hold more than 40% of correct answers. Verify: `grep -o '"answer": [0-9]' week-*/quiz-*.json | sort | uniq -c`
 
 **Run `references/quality-checklist.md` as the final step.**
 
