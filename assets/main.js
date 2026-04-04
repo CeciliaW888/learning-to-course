@@ -509,13 +509,15 @@
      ------------------------------------------------------------------ */
   function initChatWindows() {
     document.querySelectorAll('.chat-window').forEach(function (win) {
+      if (win.dataset.initialized) return; // Skip already initialized windows
+      win.dataset.initialized = 'true';
       var messages = Array.from(win.querySelectorAll('[data-msg]'));
       messages.sort(function (a, b) { return (+a.dataset.msg) - (+b.dataset.msg); });
       var currentMsg = 0;
 
       messages.forEach(function (m) { m.style.display = 'none'; });
 
-      var typingEl = win.querySelector('.typing-indicator');
+      var typingEl = win.querySelector('.chat-typing, .typing-indicator');
 
       function showTyping(sender) {
         if (!typingEl) return;
@@ -565,6 +567,14 @@
       if (resetBtn) resetBtn.addEventListener('click', resetChat);
 
       hideTyping();
+
+      // Auto-start animation after brief delay
+      setTimeout(function autoPlay() {
+        if (currentMsg < messages.length) {
+          showNext();
+          setTimeout(autoPlay, 1500); // Next message after 1.5s
+        }
+      }, 1000);
     });
   }
 
@@ -898,4 +908,7 @@
   } else {
     init();
   }
+
+  // Expose initChatWindows globally for lazy-loaded modules
+  window.initChatWindows = initChatWindows;
 })();

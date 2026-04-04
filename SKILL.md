@@ -9,36 +9,33 @@ description: Turn any learning topic into a structured course with installable P
 
 ## Step 1: Ask the User
 
-Before generating anything, ask these questions to determine course structure:
+Before generating anything, ask these 6 questions:
 
-1. **What topic?** — "What do you want to learn?"
-2. **Experience level?** — "Are you a complete beginner, have some background, or experienced?"
-3. **Time commitment?** — "How much time per day? (30 min / 1 hour / 2 hours)"
-4. **Duration?** — "How long do you want the course? (1 week / 2 weeks / 3 weeks / 1 month / custom)"
-5. **Language?** — "English, Simplified Chinese, or bilingual?"
-6. **Goal?** — "What do you want to be able to do by the end?"
+1. **Topic** — "What do you want to learn?"
+2. **Experience level** — "Complete beginner, some background, or experienced?"
+3. **Time per day** — "30 min / 1 hour / 2 hours?"
+4. **Duration** — "1 week / 2 weeks / 3 weeks / 1 month / custom?"
+5. **Language** — "English, Simplified Chinese, or bilingual?"
+6. **Goal** — "What do you want to be able to do by the end?"
 
-Use answers to dynamically generate the curriculum. Do NOT default to 21 days — match the user's needs.
+Do NOT default to 21 days — match the user's needs.
 
-### Duration Guidelines
+| User Says | Days | Structure |
+|-----------|------|-----------|
+| "Quick intro" / "1 week" | 5-7 | Foundations only |
+| "Solid understanding" / "2 weeks" | 10-14 | Foundations + building |
+| "Comprehensive" / "3 weeks" | 15-21 | Foundations + building + advanced + capstone |
+| "Deep dive" / "1 month" | 21-30 | Full curriculum with multiple projects |
 
-| User Says | Days | Weeks | Structure |
-|-----------|------|-------|-----------|
-| "Quick intro" / "1 week" | 5-7 | 1 | Foundations only, no project |
-| "Solid understanding" / "2 weeks" | 10-14 | 2 | Foundations + hands-on building |
-| "Comprehensive" / "3 weeks" | 15-21 | 3 | Foundations + building + advanced + capstone |
-| "Deep dive" / "1 month" | 21-30 | 4 | Full curriculum with multiple projects |
-
-Adjust daily time per session based on user's availability. 30-min sessions = lighter content per day, more days. 2-hour sessions = dense content, fewer days.
+30-min sessions = lighter content per day. 2-hour sessions = dense content, fewer days.
 
 ## What it generates
 
-1. **GitHub repo** — Structured learning path with daily guides, quizzes, projects
+1. **GitHub repo** — Daily guides, quizzes, projects, flashcards
 2. **Daily study guides** — 800-1500 word markdown files with 8 mandatory sections
-3. **Installable PWA** — Course website that works offline, installs to home screen; uses pre-built `styles.css` + `main.js` copied from assets/
-4. **Quiz system** — Interactive quizzes, flashcards, progress checkpoints
+3. **Installable PWA** — Tab-based course website, offline-capable, uses pre-built `styles.css` + `main.js`
+4. **Quiz system** — Interactive quizzes, flashcards, progress tracking
 5. **Diagrams** — Excalidraw source files + SVG exports
-6. **Build script** — `build.sh` assembles the final `index.html` from `_base.html` + module files + `_footer.html`
 
 ## Repo Structure
 
@@ -57,156 +54,150 @@ Adjust daily time per session based on user's availability. 30-min sessions = li
 └── website/
     ├── styles.css         ← copied from assets/styles.css (NEVER regenerate)
     ├── main.js            ← copied from assets/main.js (NEVER regenerate)
-    ├── _base.html         ← customized from assets/_base.html
-    ├── _footer.html       ← copied from assets/_footer.html
-    ├── build.sh           ← copied from scripts/build.sh
+    ├── index.html         ← built from assets/tab-index-template.html (see Build Process)
     ├── manifest.json
     ├── sw.js
     ├── offline.html
-    ├── modules/           ← day/module content HTML files
+    ├── modules/           ← day/module content HTML files (lazy-loaded)
     │   ├── 01-topic.html
-    │   ├── 02-topic.html
     │   └── ...
-    ├── diagrams/                # Exported SVG/PNG (MUST be here)
+    ├── diagrams/          ← SVG/PNG exports (MUST be here, NOT ../diagrams/)
     └── icons/
 ```
 
 ## Daily Study Guide Format
 
-Every day gets a dedicated markdown file with **8 mandatory sections**:
+Every day gets a markdown file with **8 mandatory sections** — no placeholders:
 
 1. **Learning Objectives** — 3-5 measurable goals
-2. **Core Concepts** — 800-1200 words of explanations
+2. **Core Concepts** — 800-1200 words
 3. **Key Terminology** — 5-10 terms with examples
-4. **Code Examples** — Working, commented code (copy-paste ready)
+4. **Code Examples** — Working, copy-paste ready, commented
 5. **Hands-On Exercises** — 3-5 practical activities
-6. **Curated Resources** — Verified links with sections/timestamps
+6. **Curated Resources** — Verified links (see oEmbed protocol below)
 7. **Reflection Questions** — 3-5 comprehension checks
 8. **Next Steps** — Preview of next topic + navigation links
 
-Every guide must be comprehensive, not a placeholder. See `references/daily-guide-template.md` for the full template.
-
-## Research Checklist
-
-Before writing daily guides, research using:
-
-**Primary:** Official docs, academic posts (Lilian Weng, Chip Huyen), framework docs, ArXiv papers, production examples
-**Secondary:** YouTube tutorials (verify all links), blog posts, GitHub repos, conference talks
-
-**Standard:** Every claim must be traceable to a real source. No hallucinated references.
+See `references/daily-guide-template.md` for the full template. Read `references/design-philosophy.md` when writing content.
 
 ## Video Link Verification — MANDATORY oEmbed Protocol
 
-**For EVERY YouTube video, follow this exact protocol:**
+For EVERY YouTube video:
 
-1. **Search for the video live** — use WebSearch, never generate URLs from memory
-2. **Verify via oEmbed API** — fetch `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=VIDEO_ID&format=json`
-3. **Copy the EXACT `title` field** — do not paraphrase, shorten, or "improve" it
-4. **Copy the EXACT `author_name` field** — do not guess the creator
-5. **If oEmbed returns 404** — video is dead, do NOT include it
-6. **If title doesn't match the topic** — wrong video, find a different one
-7. **Do NOT use the same video twice in the same section**
-8. **Verify the video actually covers the lesson topic** — a function calling video is NOT a safety video
+1. Search live — never generate URLs from memory
+2. Verify via oEmbed: `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=VIDEO_ID&format=json`
+3. Copy the EXACT `title` and `author_name` fields — do not paraphrase
+4. If oEmbed returns 404 — video is dead, do NOT include it
+5. Check the video actually covers the lesson topic
+6. Never use the same video twice in the same section
 
-**Why:** In ai-agent-learning, 13/21 videos had wrong titles/attributions and 5 were dead. All from LLM memory.
+**Why this matters:** In a previous course, 13/21 videos had wrong titles and 5 were dead — all from LLM memory.
 
-See `references/quality-checklist.md` for the full verification workflow including deduplication checks.
-
-## Documentation & Resource Links
-
-- Link to **top-level/stable URLs** — deep paths break when docs restructure
-- **Verify every link loads** with `web_fetch` before including it
-- **Do NOT generate** audit files, CONTRIBUTING.md, or tracking docs that go stale
+Also: verify every doc link loads via `web_fetch`. Link to top-level/stable URLs. See `references/quality-checklist.md`.
 
 ## Excalidraw Diagrams
 
-Diagrams stored in dual format: `.excalidraw` source in `diagrams/`, SVG/PNG exports in `website/diagrams/`.
-
-**Critical path rules:**
 - Source: `diagrams/*.excalidraw` | Exports: `website/diagrams/*.svg`
-- HTML: `src="diagrams/file.svg"` (relative to website/, NOT `../diagrams/`)
-- SVG preferred over PNG (scalable, smaller, searchable)
+- HTML references: `src="diagrams/file.svg"` (relative to `website/`, not `../diagrams/`)
 
-See `references/excalidraw.md` for MCP commands, export steps, HTML templates, CSS, and ready-to-use diagram JSON.
+See `references/excalidraw.md` for MCP commands, export steps, and ready-to-use templates.
 
-## PWA — Core Feature
+## PWA Requirements
 
-Every course website is a PWA. No exceptions. Required files: `manifest.json`, `sw.js`, `offline.html`, icons (192, 512, maskable, apple-touch), install prompt, Apple meta tags.
+Every course is a PWA. Required files: `manifest.json`, `sw.js`, `offline.html`, icons (192, 512, maskable, apple-touch).
 
-**Service worker rules:**
-- Always `await` async cache operations — `caches.match()` returns a Promise
-- Include ALL icon files in pre-cache list
-- Default theme: `#c4825a` (terracotta) / `#f5f0eb` (warm cream)
+- Always `await` async cache operations in the service worker
+- Include ALL icon files in the pre-cache list
+- If no icons provided, generate with Python + Pillow (required sizes: 192, 512, 192-maskable, 512-maskable, 180 apple-touch)
 
-**Icon generation:** If the user doesn't provide icons, generate them programmatically:
-- Use Python + Pillow to create simple branded icons with the accent color
-- Required sizes: 192×192, 512×512 (regular), 192×192, 512×512 (maskable with full bleed), 180×180 (Apple touch)
-- Maskable icons must have the safe zone (80% center area) containing the design
-- Save to `website/icons/`
+See `references/pwa-setup.md` for complete implementation.
 
-See `references/pwa-setup.md` for complete implementation guide.
+## Interactive Elements (pre-built in main.js)
 
-### Interactive Elements (Pre-built)
+Use these CSS classes in module HTML — do NOT invent new ones:
 
-The pre-built main.js auto-initializes these elements by scanning for CSS classes and data-* attributes:
+| Element | Class / Attribute |
+|---------|------------------|
+| Glossary tooltip | `.term[data-definition]` |
+| Chat animation | `.chat-window` > `.chat-message[data-msg][data-sender]` |
+| Flow animation | `.flow-animation[data-steps]` |
+| Quiz | `.quiz-card[data-correct][data-explanation-N]` > `.quiz-options` > `.quiz-option` |
+| Flashcard | `.flashcard` > `.flashcard-front` / `.flashcard-back` |
+| Callout | `.callout-accent` / `.callout-info` / `.callout-warning` |
+| Step card | `.step-cards` > `.step-card` > `.step-num` + `.step-body` |
 
-- **Glossary tooltips** — `.term[data-definition]` on every technical term
-- **Code translations** — `.translation-block` with code + English columns
-- **Chat animations** — `.chat-window` with sequential message reveal
-- **Data flow animations** — `.flow-animation[data-steps]`
-- **Quizzes** — `.quiz-card` with `data-correct`, `data-explanation-*`
-- **Flashcards** — `.flashcard` with flip animation
-- **Drag-and-drop** — `.dnd-container` with chips and zones
-- **Spot-the-bug** — `.bug-challenge` with clickable code lines
-- **Callout boxes** — `.callout-accent`, `.callout-info`, `.callout-warning`
-- **Step cards** — `.step-card` with numbered badges
-- **File trees** — `.file-tree` with nested folders
-- **Architecture diagrams** — `.arch-diagram` with clickable components
+See `references/interactive-elements.md` for full HTML patterns.
 
-See `references/interactive-elements.md` for HTML patterns and `assets/styles.css` for styling.
+## Website Build Process
 
-## Website Architecture
-
-### Option A: Scrollable single-page (courses with 7 or fewer days)
-Use the `build.sh` concatenation approach. All modules render as full-viewport sections in one scrollable page. Suitable for short courses where all content is manageable in a single scroll.
-
-### Option B: Tab-based layout (recommended for 10+ day courses)
-Create a self-contained `index.html` with inline CSS/JS that provides:
-- **Hero section** — course title, subtitle, tags, PWA install button
-- **Progress card** — day grid (7 columns x N rows), progress bar, week labels
-- **Sticky tab navigation** — Curriculum, Learning Content, Diagrams, Flashcards, Quiz, Resources
-- **Curriculum tab** — expandable week cards with day items linking to full guides
-- **Learning Content tab** — lazy-loads `modules/*.html` with interactive features from `styles.css`/`main.js`
-- **Quiz/Flashcard tabs** — load from `website/data/*.json`
-- **Resources tab** — curated external links
-
-This approach loads `styles.css` and `main.js` for interactive features while providing better navigation than a 21-screen scroll. See `references/tab-website-template.html` for the reference implementation.
-
-When using Option B:
-- The `build.sh` step is not needed in the GitHub Actions workflow
-- Module files in `modules/` are fetched dynamically when the Learning Content tab is activated
-- Override `.module { min-height: auto; }` since modules are embedded, not full-viewport (the CSS includes `.section .module` override for this)
-- After loading modules dynamically, call `initIndexQuizzes()` to re-initialize quiz handlers on the new DOM elements
-
-## Website Build Process (Option A)
-
-The PWA website uses a pre-built runtime. Do NOT generate CSS or JS from scratch.
+Do NOT generate CSS or JS from scratch — use the pre-built assets.
 
 1. Copy `assets/styles.css` → `website/styles.css` (verbatim, never modify)
 2. Copy `assets/main.js` → `website/main.js` (verbatim, never modify)
-3. Copy `assets/_footer.html` → `website/_footer.html`
-4. Copy `scripts/build.sh` → `website/build.sh`
-5. Customize `assets/_base.html` → `website/_base.html`:
-   - Replace COURSE_TITLE (2 places) with actual title
-   - Replace ACCENT_COLOR/HOVER/LIGHT/MUTED with chosen palette
-   - Replace NAV_DOTS with one button per day/module
-6. Write module content to `website/modules/01-topic.html`, `02-topic.html`, etc.
-   - Each file contains ONLY a `<section class="module" id="module-N">` block
-   - NO <html>, <head>, <body>, <style>, or <script> tags
-   - Use class names and data-* attributes documented in interactive-elements.md
-7. Run `cd website && bash build.sh` to assemble index.html
+3. Copy `assets/tab-index-template.html` → `website/index.html`, then replace these tokens:
 
-**Module HTML must follow this exact structure:**
+   | Token | Replace with |
+   |-------|-------------|
+   | `LANG_CODE` | BCP-47 code: `en` or `zh-CN` |
+   | `COURSE_TITLE` | Course name (2 places) |
+   | `COURSE_DESCRIPTION` | Meta description |
+   | `ACCENT_HEX` | Hex color for theme-color |
+   | `PWA_SHORT_NAME` | Max 12 chars |
+   | `FONT_IMPORT_LINE` | Full `<link>` tag for Google Fonts |
+   | `FONT_OVERRIDE_CSS` | CSS font-family overrides (blank for English; for Chinese: `h1,h2,h3{font-family:'Noto Serif SC',serif;}`) |
+   | `ACCENT_COLOR` / `ACCENT_HOVER` / `ACCENT_LIGHT` / `ACCENT_MUTED` | Palette values (see table below) |
+   | `HERO_EMOJI` | Single emoji |
+   | `COURSE_SUBTITLE` | e.g. `15-Day Course · 1 hour/day` |
+   | `TAG_1`…`TAG_4` | Hero badge labels |
+   | `DAY_COUNT` + `NUMBER_OF_DAYS` | Integer (appears in HTML and JS) |
+   | `WEEK_LABELS_HTML` | One `<span>` per week |
+   | `CURRICULUM_HTML` | Expandable week/day cards (see pattern below) |
+   | `MODULE_FILES_JSON` | JS array: `['modules/01-intro.html', ...]` |
+   | `DIAGRAM_FILES_JSON` | JS array: `['diagrams/overview.svg']` or `[]` |
+   | `COURSE_STORAGE_KEY` | Unique localStorage key e.g. `'course-ai-agents-progress'` |
+   | `RESOURCES_HTML` | Resource group HTML (see pattern below) |
+
+4. Write module files to `website/modules/01-topic.html`, `02-topic.html`, etc.
+
+**Curriculum HTML pattern:**
+```html
+<div class="week-section">
+  <h3>Week 1: Foundations</h3>
+  <div class="day-card">
+    <div class="day-card-header">
+      <span class="day-card-title">Day 1: Topic Title</span>
+      <div class="day-card-meta">
+        <span class="day-type type-foundations">Foundations</span>
+        <span class="chevron">▼</span>
+      </div>
+    </div>
+    <div class="day-card-body">
+      <ul><li>Key point 1</li><li>Key point 2</li></ul>
+      <a class="day-link" href="https://github.com/GITHUB_USERNAME/GITHUB_REPO/blob/main/week-01/day-01-slug.md" target="_blank">Read Full Guide →</a>
+    </div>
+  </div>
+</div>
+```
+Day type classes: `type-foundations`, `type-concepts`, `type-advanced`, `type-project`, `type-review`
+
+**Resources HTML pattern:**
+```html
+<div class="resource-group">
+  <h3>📚 Books</h3>
+  <a class="resource-link" href="URL" target="_blank">
+    <span class="resource-icon">📖</span>
+    <div class="resource-text"><strong>Title</strong><span>Description</span></div>
+  </a>
+</div>
+```
+
+## Module HTML Structure
+
+> [!IMPORTANT]
+> Every `<section class="module">` MUST have `<div class="module-inner">` as its first and only direct child. Missing this wrapper breaks all layout.
+
+> [!CAUTION]
+> Only use class names from the Interactive Elements table above or `references/interactive-elements.md`. Do NOT invent classes like `module-header`, `objectives`, `content-section`, `subtitle`, `difficulty`, or `comparison-table` — they don't exist in `styles.css`.
 
 ```html
 <section class="module" id="module-N" data-module="Day N: Title">
@@ -218,227 +209,156 @@ The PWA website uses a pre-built runtime. Do NOT generate CSS or JS from scratch
   <div class="step-cards">
     <div class="step-card">
       <div class="step-num">1</div>
-      <div class="step-body">
-        <strong>Concept title</strong>
-        <p>Explanation</p>
-      </div>
+      <div class="step-body"><strong>Concept</strong><p>Explanation</p></div>
     </div>
   </div>
 
-  <div class="callout-accent">
-    <strong>Key insight:</strong> Summary...
-  </div>
+  <div class="callout-accent"><strong>Key insight:</strong> ...</div>
 
-  <h3>Code Example</h3>
-  <pre><code class="language-typescript">// code</code></pre>
-
-  <h3>Knowledge Check</h3>
-  <div class="quiz-card" data-correct="1" data-explanation-0="Wrong" data-explanation-1="Correct" data-explanation-2="Wrong">
+  <div class="quiz-card" data-correct="1" data-explanation-0="Wrong" data-explanation-1="Correct">
     <p class="quiz-question">Question?</p>
     <div class="quiz-options">
       <button class="quiz-option">A</button>
       <button class="quiz-option">B (correct)</button>
-      <button class="quiz-option">C</button>
     </div>
   </div>
 
-  <h3>Key Terms</h3>
-  <p><span class="term" data-definition="Definition here">Term</span></p>
+  <p><span class="term" data-definition="Definition">Term</span></p>
 
 </div>
 </section>
 ```
 
-**Critical class names (CSS will break if wrong):**
-- `module-inner` — required wrapper inside every `<section class="module">`
-- `step-cards` — required wrapper around `step-card` elements
-- `step-num` — NOT `step-badge` or `step-number`
-- `step-body` — NOT a bare `<div>`, must have this class
-- `quiz-card` with `data-correct="INDEX"` — 0-based index of correct option
-- `data-explanation-N` — per-option explanation attributes on quiz-card
+Module files contain ONLY this `<section>` block — no `<html>`, `<head>`, `<body>`, `<style>`, or `<script>` tags.
 
-### Accent Color Palettes
+## Accent Color Palettes
 
-| Palette | --color-accent | --color-accent-hover | --color-accent-light | --color-accent-muted |
-|---------|---------------|---------------------|---------------------|---------------------|
-| Terracotta (default) | #c4825a | #b07149 | rgba(196,130,90,0.12) | rgba(196,130,90,0.06) |
-| Coral | #D94F30 | #C4432A | rgba(217,79,48,0.12) | rgba(217,79,48,0.06) |
-| Teal | #2A7B9B | #236A86 | rgba(42,123,155,0.12) | rgba(42,123,155,0.06) |
-| Amber | #B8860B | #9E7309 | rgba(184,134,11,0.12) | rgba(184,134,11,0.06) |
-| Forest | #4a7c59 | #3d6849 | rgba(74,124,89,0.12) | rgba(74,124,89,0.06) |
+| Palette | `ACCENT_COLOR` | `ACCENT_HOVER` | `ACCENT_LIGHT` | `ACCENT_MUTED` |
+|---------|---------------|----------------|----------------|----------------|
+| Terracotta (default) | `#c4825a` | `#b07149` | `rgba(196,130,90,0.12)` | `rgba(196,130,90,0.06)` |
+| Coral | `#D94F30` | `#C4432A` | `rgba(217,79,48,0.12)` | `rgba(217,79,48,0.06)` |
+| Teal | `#2A7B9B` | `#236A86` | `rgba(42,123,155,0.12)` | `rgba(42,123,155,0.06)` |
+| Amber | `#B8860B` | `#9E7309` | `rgba(184,134,11,0.12)` | `rgba(184,134,11,0.06)` |
+| Forest | `#4a7c59` | `#3d6849` | `rgba(74,124,89,0.12)` | `rgba(74,124,89,0.06)` |
 
 ## Parallel Generation (10+ Day Courses)
 
-For longer courses, use day briefs to enable parallel generation:
-
 1. Research and verify all resources upfront
-2. Write briefs for each day using the "Day Brief Template" section in `references/daily-guide-template.md`
+2. Write day briefs using the template in `references/daily-guide-template.md`
 3. Dispatch 2-3 briefs per batch to subagents
-4. Each subagent receives: its brief + relevant reference files
-5. Each subagent produces: one daily guide markdown + one website module HTML
-6. Main agent does consistency check after all days complete
+4. Each subagent produces: one daily guide `.md` + one module `.html`
+5. Main agent does a consistency check after all days complete
 
 For courses under 10 days, generate sequentially — brief overhead exceeds time saved.
 
 ## GitHub Placeholder Replacement
 
-Before delivery, replace ALL `YOUR_USERNAME`, `YOUR_REPO`, `USER/REPO` with actual values. Auto-detect from `git remote -v` or ask. Verify with `grep -r "YOUR_" .` — must return empty.
+Before delivery, replace ALL `YOUR_USERNAME`, `YOUR_REPO`, `USER/REPO` with actual values. Auto-detect from `git remote -v` or ask. Verify: `grep -r "YOUR_" .` must return empty.
 
-See `references/quality-checklist.md` Section 2 for scripts.
+## GitHub Pages Deployment — MANDATORY
 
-## GitHub Pages Deployment
+**Every course MUST be deployed as a live PWA.**
 
-The `website/` directory is deployed as the site root. This means `../` paths will NOT resolve on the deployed site.
+### Step 1: Create Workflow File
 
-**Rules:**
-- Quiz JSON, flashcard JSON, and any data files MUST be copied into `website/data/`
-- Day guide links MUST use absolute GitHub URLs: `https://github.com/USERNAME/REPO/blob/main/week-XX/day-XX-slug.md`
-- Diagram SVGs are fine — they live inside `website/diagrams/` already
-- The GitHub Actions workflow should deploy `website/` as the artifact path
-- Add `enablement: true` to `actions/configure-pages` to auto-enable Pages
-- Add a concurrency group to prevent deployment races:
+Create `.github/workflows/deploy.yml`:
 
 ```yaml
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 concurrency:
-  group: "pages"
+  group: pages
   cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v4
+        with:
+          enablement: true
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: website
+      - id: deployment
+        uses: actions/deploy-pages@v4
 ```
+
+### Step 2: Enable GitHub Pages
+
+After pushing the workflow file:
+
+```bash
+gh api \
+  --method POST \
+  -H "Accept: application/vnd.github+json" \
+  /repos/OWNER/REPO/pages \
+  -f "build_type=workflow"
+```
+
+### Step 3: Push and Verify
+
+```bash
+git add .github/workflows/deploy.yml
+git commit -m "🚀 Add GitHub Pages deployment"
+git push
+
+# Check deployment
+gh run list --limit 1
+```
+
+**Site will be live at:** `https://OWNER.github.io/REPO/`
+
+### Important Constraints
+
+The `website/` directory is the site root — `../` paths will NOT resolve.
+
+- Quiz/flashcard JSON MUST be in `website/data/`
+- Day guide links MUST use absolute GitHub URLs: `https://github.com/USERNAME/REPO/blob/main/week-XX/day-XX-slug.md`
+- Include live URL in README
 
 ## Quality Gates — MANDATORY
 
-Every course must pass before delivery:
+Run `references/quality-checklist.md` before delivery. Every course must pass:
 
-1. **Link verification** — all YouTube videos verified via oEmbed, all docs links reachable
-2. **Placeholder replacement** — no YOUR_USERNAME/YOUR_REPO remaining
-3. **Diagram paths** — exports in `website/diagrams/`, HTML uses relative paths
-4. **Daily guide completeness** — all days have 8 sections, 800+ word core concepts
-5. **Deployment readiness** — HTML loads, service worker registers, manifest valid
-6. **Quiz answer distribution** — correct answer positions must vary across questions. No single index should hold more than 40% of correct answers. Verify: `grep -o '"answer": [0-9]' week-*/quiz-*.json | sort | uniq -c`
-
-**Run `references/quality-checklist.md` as the final step.**
+1. All YouTube videos verified via oEmbed
+2. No `YOUR_USERNAME`/`YOUR_REPO` placeholders remaining
+3. All diagram SVGs in `website/diagrams/`, HTML uses relative paths
+4. All days have 8 sections, 800+ word core concepts
+5. HTML loads, service worker registers, manifest valid
+6. Quiz answer distribution: no single index >40% of correct answers
 
 ## Multi-Language Support
 
-Specify language when creating: `"Turn AI Agents into a course in Simplified Chinese"`
+**Chinese courses:** Set `lang="zh-CN"`, load Noto Serif SC, translate all UI labels, keep technical terms in English with Chinese explanation: `ReAct（推理与行动结合）`, keep code comments in English.
 
-**Supported:** English (default), Simplified Chinese, Bilingual (both)
-
-**Chinese courses:** `lang="zh-CN"`, load Noto Serif SC font, Chinese punctuation, translate UI labels, keep technical terms in English with Chinese explanation: `ReAct（推理与行动结合）`, keep code comments in English.
-
-**Bilingual:** Primary language first, section headers in both: `## 核心概念 Core Concepts`. Find Chinese-language videos on Bilibili where available.
-
-**Resource localization:** RedNote/小红书 templates for Chinese, Twitter/X for English.
-
-## Design Philosophy
-
-Every design decision serves one goal: the learner understands faster and retains longer.
-
-### Visual-First Design
-
-The screen is a canvas, not a page. Learners should *see* concepts before they read about them.
-
-- **Max 2-3 sentences per text block.** If you're writing a fourth sentence, you need a visual break — a diagram, card, code snippet, or interactive element.
-- **Every screen must be at least 50% visual content.** Measure by vertical space. If text dominates, convert something.
-- **Convert lists to cards.** Bullet points become step cards, icon-label rows, or pattern cards.
-- **Convert sequences to flow diagrams.** Any "first... then... finally..." narrative becomes a visual flow.
-- **Convert comparisons to visual grids.** Side-by-side tables become styled comparison cards.
-- **Replace bullet paragraphs with icon rows.** Each point gets an icon, a label, and one sentence.
-
-When in doubt: if a learner squints at the screen and sees a wall of grey text, redesign it.
-
-### Show, Don't Tell
-
-Explanation is a last resort. Prefer, in order:
-
-1. **Diagrams over descriptions.** A system architecture diagram replaces 500 words of "Component A talks to Component B."
-2. **Code examples over theory.** Show what happens, then explain why.
-3. **Interactive elements over passive reading.** A clickable flowchart beats a static one. A quiz beats a summary.
-4. **Animations over static images where data flows.** If the concept involves movement (request/response, pipeline stages, message passing), animate it.
-
-Every visual must carry information that would otherwise require text.
-
-### Quiz Philosophy
-
-Quizzes test whether learners can *apply* knowledge, not whether they can *recall* it.
-
-**Good question patterns:**
-- "What would you do?" — Present a realistic scenario and ask for the next step.
-- "Where would you look?" — A user reports an error. Which log, config, or component do you investigate first?
-- Debugging scenarios, architectural decisions, tradeoff analysis.
-
-**Never ask:** acronym recall, syntax recall, list memorization, context-free true/false.
-
-**Feedback:** Every question includes an explanation for both correct and incorrect answers. Encouraging tone: "Good instinct, but..." not "Wrong."
-
-### Metaphor Strategy
-
-- **Ground in everyday life first.** Introduce the metaphor before revealing technical details.
-- **One metaphor per concept.** Never reuse a metaphor across different sections.
-- **Avoid recycled cliches.** No "restaurant for APIs." No "library for databases."
-- **Pick metaphors that feel inevitable.** The right metaphor makes the learner say "oh, it's *exactly* like that."
-- **Introduce, connect, release.** Start with the metaphor, map it to the technical concept, then let the learner work with the real thing.
-
-### Code and English Translations
-
-- **Pair real code with plain-language line-by-line explanations.** Every code block gets a "what this does in English" companion.
-- **Focus on "why" over "what."** Don't say "this line imports requests." Say "we need requests because we're about to make HTTP calls."
-- **Use actual working code.** Never pseudo-code. Copy-paste ready.
-- **Keep snippets naturally short: 5-15 lines.** Don't truncate — find a naturally short section.
-- **Language tags on every code block** for syntax highlighting.
-
-### Glossary and Terminology
-
-- **Define every technical term on first use per section.** If a term appeared in Day 3 and appears again in Day 7, define it again.
-- **Use the dashed-underline tooltip pattern.** Terms get a subtle underline; hovering reveals the definition.
-- **When in doubt, add a tooltip.** Over-definition beats under-definition.
-- **For bilingual courses:** `ReAct（推理与行动结合）` — English term with Chinese explanation.
-
-### Motivation Before Mechanism
-
-Every section must answer **"why should I care?"** before **"how does it work?"**
-
-- The answer to "why" is always practical — it helps the learner do something specific.
-- Connect to the learner's stated goal from the intake questionnaire.
-- **Structure every section as:** motivation (1-2 sentences) -> concept (visual + explanation) -> application (code or exercise).
-- Never start a section with a definition. Start with a problem the learner will recognize.
-
-### Progressive Disclosure
-
-Reveal complexity in layers. Never dump everything at once.
-
-- **Start with what learners already know.** Begin from user-facing behavior or everyday concepts.
-- **Peel back layers gradually:** experience -> mechanism -> implementation.
-- **One concept per screen or section.** If covering two ideas, split into two sections.
-- **Use "you already know this" bridges** to connect new material to previous sections.
-- **Hide advanced details behind expandable sections.**
-
-### Resource Integrity
-
-Every external link in the course must be verified. No exceptions.
-
-- **All links verified via `web_fetch` before inclusion.** If a link doesn't load, it doesn't go in.
-- **YouTube videos verified via oEmbed API.** Copy exact `title` and `author_name` — never paraphrase.
-- **No hallucinated references.** Search for real resources, verify they exist, then include them.
-- **Dead links replaced or removed.** Never leave a broken link as a placeholder.
-- **Prefer stable, top-level URLs** over deep paths that break when docs restructure.
-
-See `references/quality-checklist.md` for the full verification workflow and common gotchas.
+**Bilingual:** Primary language first, section headers in both languages: `## 核心概念 Core Concepts`. Find Chinese-language videos on Bilibili.
 
 ## Bundled Resources
 
-### `references/` — Documentation for the AI (loaded into context as needed)
-- `daily-guide-template.md` — Full template for daily study guides + day brief template for parallel generation
-- `quality-checklist.md` — Pre-delivery verification checklist + gotchas quick reference
-- `interactive-elements.md` — Quiz types, flashcards, animations, all interactive patterns
-- `excalidraw.md` — Diagram workflow, MCP commands, export steps, ready-to-use templates
+### `references/` — Load into context as needed
+- `daily-guide-template.md` — Full daily guide template + day brief template for parallel generation
+- `quality-checklist.md` — Pre-delivery checklist + gotchas
+- `interactive-elements.md` — All interactive HTML patterns
+- `excalidraw.md` — Diagram workflow, MCP commands, templates
 - `pwa-setup.md` — Complete PWA implementation guide
-- `design-system.md` — Visual design system documentation (source of truth is `assets/styles.css`)
+- `design-system.md` — Visual design system (source of truth: `assets/styles.css`)
+- `design-philosophy.md` — Content writing principles (read when writing daily guides and modules)
 
-### `assets/` — Files used in output (copied into courses)
+### `assets/` — Copy into courses
 - `styles.css` — Pre-built CSS framework (copy verbatim, NEVER regenerate)
 - `main.js` — Pre-built JS engine (copy verbatim, NEVER regenerate)
-- `_base.html` — HTML template shell (customize per course)
-- `_footer.html` — HTML closing tags (copy verbatim)
-
-### `scripts/` — Executable code
-- `build.sh` — Website assembly script (copy into course, run to produce index.html)
+- `tab-index-template.html` — Tab-based index.html shell (copy + replace tokens, NEVER regenerate)
