@@ -476,3 +476,34 @@ Overall: ✅ PASS — Ready for delivery
 ```
 
 **The course is NOT ready until this summary shows all ✅.**
+
+---
+
+## Post-Generation Cleanup
+
+### Ephemeral Files
+Before committing, delete all build-time artifacts:
+
+- [ ] `briefs/` directory deleted (used for parallel generation only)
+- [ ] No playground HTML files in repo (create in `/tmp/` instead)
+- [ ] No test scripts in repo
+- [ ] README does not reference deleted directories
+
+### Data Files
+Verify all required data exists:
+
+- [ ] `website/data/flashcards.json` exists with 5+ cards per day (100+ total for 21-day course)
+- [ ] `website/data/quiz-01.json` through `quiz-{DAY_COUNT}.json` all exist
+- [ ] Each quiz file has 3+ questions with varied answer positions
+- [ ] All tabs in the website have content (no perpetual "Loading..." states)
+
+### Module Format Verification
+- [ ] No module file contains `<!DOCTYPE` or `<html` tags (must be fragments)
+- [ ] No module file contains `<script src=` external script references
+- [ ] No module file contains `<nav class="day-nav"` navigation (accordion handles this)
+- [ ] Verify: `grep -l "<!DOCTYPE\|<html\|script src=" website/modules/*.html` returns empty
+
+### GitHub URL Consistency
+- [ ] All GitHub links use same username and repo name
+- [ ] Verify: `grep -roh "github.com/[^/]*/[^/\"]*" website/ README.md | sort -u` returns exactly one repo URL
+- [ ] No `YOUR_USERNAME`, `YOUR_REPO`, `GITHUB_USERNAME`, `GITHUB_REPO` placeholders remaining

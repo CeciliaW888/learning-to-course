@@ -279,6 +279,48 @@ async function cacheFirst(request) {
 }
 ```
 
+### Service Worker Strategy
+
+Use **network-first for HTML**, **cache-first for static assets**:
+
+```javascript
+self.addEventListener('fetch', (event) => {
+  // Network-first for HTML (always get latest content)
+  if (event.request.mode === 'navigate' || event.request.url.endsWith('.html')) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          return response;
+        })
+        .catch(() => caches.match(event.request).then(r => r || caches.match('./offline.html')))
+    );
+    return;
+  }
+  // Cache-first for static assets (CSS, JS, images, fonts)
+  event.respondWith(
+    caches.match(event.request)
+      .then((response) => {
+        if (response) return response;
+        return fetch(event.request).then((response) => {
+          if (!response || response.status !== 200 || response.type !== 'basic') return response;
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          return response;
+        });
+      })
+      .catch(() => { /* no fallback for non-navigation requests */ })
+  );
+});
+```
+
+**Why this matters:**
+- Cache-first for HTML means users never see updates until the SW itself changes
+- Returning `offline.html` for non-navigation requests (like module fetches) causes the offline page content to be injected as lesson content and marked as "loaded"
+- Network-first ensures module HTML updates are always visible
+- Static assets (CSS/JS/images) rarely change, so cache-first is correct for them
+
 ### Versioning Strategy
 
 When course content updates:

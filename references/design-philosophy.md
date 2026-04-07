@@ -55,6 +55,14 @@ Quizzes test whether learners can *apply* knowledge, not *recall* it.
 - **Keep snippets naturally short: 5-15 lines.** Don't truncate — find a naturally short section.
 - **Language tags on every code block** for syntax highlighting.
 
+## Code and English Translations
+
+- **Pair real code with plain-language line-by-line explanations.** Every code block gets a "what this does in English" companion.
+- **Focus on "why" over "what."** Don't say "this line imports requests." Say "we need requests because we're about to make HTTP calls."
+- **Use actual working code.** Never pseudo-code. Copy-paste ready.
+- **Keep snippets naturally short: 5-15 lines.** Don't truncate — find a naturally short section.
+- **Language tags on every code block** for syntax highlighting.
+
 ## Glossary and Terminology
 
 - **Define every technical term on first use per section.** If a term appeared in Day 3 and appears again in Day 7, define it again.
@@ -80,3 +88,13 @@ Reveal complexity in layers. Never dump everything at once.
 - **One concept per screen or section.** If covering two ideas, split into two sections.
 - **Use "you already know this" bridges** to connect new material to previous sections.
 - **Hide advanced details behind expandable sections.**
+
+## Resource Integrity
+
+Every external link in the course must be verified. No exceptions.
+
+- **All links verified via `web_fetch` before inclusion.** If a link doesn't load, it doesn't go in.
+- **YouTube videos verified via oEmbed API.** Copy exact `title` and `author_name` — never paraphrase.
+- **No hallucinated references.** Search for real resources, verify they exist, then include them.
+- **Dead links replaced or removed.** Never leave a broken link as a placeholder.
+- **Prefer stable, top-level URLs** over deep paths that break when docs restructure.
