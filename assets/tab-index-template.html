@@ -73,8 +73,8 @@
 
     /* ── Layout ── */
     .container { max-width: var(--max-w); margin: 0 auto; padding: 0 20px; }
-    .section { display: none; padding: 32px 0 64px; }
-    .section.active { display: block; }
+    main > .section { display: none; padding: 32px 0 64px; }
+    main > .section.active { display: block; }
     .section-heading { font-family: 'Crimson Pro', serif; font-size: 1.6rem; font-weight: 700; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 2px solid var(--border); }
 
     /* ── Hero ── */
@@ -181,8 +181,7 @@
 <!-- ── Tab Nav ── -->
 <nav class="tab-nav" aria-label="Course sections">
   <div class="tab-nav-inner">
-    <button class="tab-btn active" data-tab="curriculum"  id="tab-curriculum">📋 Curriculum</button>
-    <button class="tab-btn"        data-tab="modules"     id="tab-modules">📖 Learning Content</button>
+    <button class="tab-btn active" data-tab="modules"     id="tab-modules">📖 Learning Content</button>
     <button class="tab-btn"        data-tab="diagrams"    id="tab-diagrams">🗺 Diagrams</button>
     <button class="tab-btn"        data-tab="flashcards"  id="tab-flashcards">🃏 Flashcards</button>
     <button class="tab-btn"        data-tab="quiz"        id="tab-quiz">✅ Quiz</button>
@@ -216,15 +215,8 @@
 </div>
 
 <main>
-
-  <!-- ── 1. Curriculum ── -->
-  <section class="section active container" id="section-curriculum" aria-labelledby="tab-curriculum">
-    <h2 class="section-heading">Course Curriculum</h2>
-    CURRICULUM_HTML
-  </section>
-
-  <!-- ── 2. Learning Content ── -->
-  <section class="section container" id="section-modules" aria-labelledby="tab-modules">
+  <!-- ── 1. Learning Content ── -->
+  <section class="section active container" id="section-modules" aria-labelledby="tab-modules">
     <div id="modules-container"></div>
     <div class="empty-state" id="modules-loading">Loading modules…</div>
   </section>

@@ -132,6 +132,60 @@ if [ -f website/sw.js ]; then
 
   SW_OFFLINE_NAV=$(grep -c "offline.html" website/sw.js 2>/dev/null || echo "0")
   [ "$SW_OFFLINE_NAV" -le 2 ] && pass "SW offline fallback is scoped (not blanket)" || warn "SW may return offline.html for non-navigation requests"
+
+  # Strict precache coverage checks (offline-first UX contract)
+  # Check if a relative asset path appears in SW as either:
+  # './path/file.ext' or 'path/file.ext' (single or double quotes)
+  in_sw_precache() {
+    local rel="$1"
+    grep -qF "'./$rel'" website/sw.js && return 0
+    grep -qF "\"./$rel\"" website/sw.js && return 0
+    grep -qF "'$rel'" website/sw.js && return 0
+    grep -qF "\"$rel\"" website/sw.js && return 0
+    return 1
+  }
+
+  MISSING_PRECACHE=0
+
+  # Modules should be offline-available immediately after install
+  for f in website/modules/*.html; do
+    [ -f "$f" ] || continue
+    rel="${f#website/}"
+    if ! in_sw_precache "$rel"; then
+      fail "SW precache missing module asset: $rel"
+      MISSING_PRECACHE=1
+    fi
+  done
+
+  # Learning data files should be offline-available (quiz + flashcards)
+  for f in website/data/*.json; do
+    [ -f "$f" ] || continue
+    rel="${f#website/}"
+    if ! in_sw_precache "$rel"; then
+      fail "SW precache missing data asset: $rel"
+      MISSING_PRECACHE=1
+    fi
+  done
+
+  # Diagram SVGs rendered by the course UI
+  for f in website/diagrams/*.svg; do
+    [ -f "$f" ] || continue
+    rel="${f#website/}"
+    if ! in_sw_precache "$rel"; then
+      fail "SW precache missing diagram asset: $rel"
+      MISSING_PRECACHE=1
+    fi
+  done
+
+  # Maskable icons are required for install-quality PWA behavior
+  for rel in icons/icon-192-maskable.png icons/icon-512-maskable.png; do
+    if [ -f "website/$rel" ] && ! in_sw_precache "$rel"; then
+      fail "SW precache missing maskable icon: $rel"
+      MISSING_PRECACHE=1
+    fi
+  done
+
+  [ "$MISSING_PRECACHE" -eq 0 ] && pass "SW precache includes modules, data, diagrams, and maskable icons"
 fi
 
 echo ""
@@ -148,15 +202,15 @@ if [ -f website/index.html ]; then
   SCOPED_CSS=$(grep -c "main > .section\|main>\.section" website/index.html 2>/dev/null || echo "0")
   UNSCOPED_CSS=$(grep -c "^[[:space:]]*\.section {" website/index.html 2>/dev/null)
   UNSCOPED_CSS=${UNSCOPED_CSS:-0}
-  [ "$SCOPED_CSS" -gt 0 ] && pass "CSS .section rules are scoped to main >" || warn "CSS .section rules may not be scoped (could hide module internals)"
+  [ "$SCOPED_CSS" -gt 0 ] && pass "CSS .section rules are scoped to main >" || fail "CSS .section rules are not scoped to main > (could hide module internals)"
 
   # Check no Curriculum tab
   CURRICULUM_TAB=$(grep -c 'data-tab="curriculum"' website/index.html 2>/dev/null)
-  [ "${CURRICULUM_TAB:-0}" -eq 0 ] && pass "No Curriculum tab (accordion is the curriculum)" || warn "Curriculum tab still exists — consider removing"
+  [ "${CURRICULUM_TAB:-0}" -eq 0 ] && pass "No Curriculum tab (accordion is the curriculum)" || fail "Curriculum tab still exists (must be removed)"
 
   # Check resp.ok validation
   RESP_OK=$(grep -c "resp.ok\|response.ok" website/index.html 2>/dev/null || echo "0")
-  [ "$RESP_OK" -gt 0 ] && pass "Module loader validates resp.ok" || warn "Module loader may not validate resp.ok before injection"
+  [ "$RESP_OK" -gt 0 ] && pass "Module loader validates resp.ok" || fail "Module loader does not validate resp.ok before injection"
 fi
 
 echo ""
