@@ -158,7 +158,8 @@ Use different strategies based on resource type:
 
 | Resource Type | Strategy | Why |
 |---------------|----------|-----|
-| index.html, CSS, JS (local) | **Stale-while-revalidate** | Instant load from cache + background refresh |
+| index.html, module HTML files | **Network-first** | Users always see latest content; module updates visible immediately |
+| CSS, JS (local) | **Stale-while-revalidate** | Instant load from cache + background refresh |
 | Fonts, icons, images | **Cache-first** | Immutable resources, cache forever |
 | External CDN resources | **Network-first** | Want freshest version, fall back to cache |
 | Navigation (HTML pages) | **Network-first** | Fall back to offline.html |
@@ -176,13 +177,31 @@ const CACHE_NAME = `{{course-slug}}-v${CACHE_VERSION}`;
 const OFFLINE_URL = './offline.html';
 
 // Pre-cache on install (critical path resources)
+// IMPORTANT: Include ALL module HTML files, data JSONs, and diagram SVGs.
+// Missing assets = broken offline mode. Generate this list from the course
+// structure — one entry per module, quiz file, flashcard file, and SVG.
 const PRECACHE_URLS = [
   './',
   './index.html',
   './offline.html',
   './manifest.json',
+  './styles.css',
+  './main.js',
   './icons/icon-192.png',
-  './icons/icon-512.png'
+  './icons/icon-512.png',
+  './icons/icon-192-maskable.png',
+  './icons/icon-512-maskable.png',
+  './icons/apple-touch-icon.png',
+  // Module HTML fragments (one per day — lazy-loaded by accordion)
+  './modules/01-topic.html',
+  // ... add all ./modules/XX-*.html
+  // Quiz and flashcard data
+  './data/flashcards.json',
+  './data/quiz-01.json',
+  // ... add all ./data/quiz-XX.json
+  // Diagram SVG exports
+  './diagrams/example.svg',
+  // ... add all ./diagrams/*.svg
 ];
 
 // ---- INSTALL ----

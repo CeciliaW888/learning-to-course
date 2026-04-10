@@ -9,7 +9,8 @@
 
   <!-- PWA -->
   <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="PWA_SHORT_NAME">
@@ -42,6 +43,8 @@
       --color-text-muted: #9e8e84;
       --color-surface: #ffffff;
       --color-border: #e8e0d8;
+      --accent-green: #4a7c59;
+      --accent-red:   #c86b5a;
 
       --cream: #f5f0eb; --white: #ffffff; --border: #e8e0d8;
       --shadow: rgba(0,0,0,0.08); --text-primary: #2c2420;
@@ -88,23 +91,27 @@
     .install-btn-hero:hover { background: var(--accent-hover); }
     .install-btn-hero.visible { display: inline-block; }
 
-    /* ── Progress Card ── */
-    .progress-card { background: var(--white); border-radius: var(--radius); border: 1px solid var(--border); padding: 24px; margin: 24px 20px 0; max-width: var(--max-w); margin-inline: auto; }
-    .progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-    .progress-header h3 { font-size: 1rem; font-weight: 600; }
-    .progress-count { color: var(--text-secondary); font-size: 0.9rem; }
-    .progress-track { height: 6px; background: var(--border); border-radius: 3px; margin-bottom: 20px; overflow: hidden; }
-    .progress-fill { height: 100%; background: var(--accent); border-radius: 3px; width: 0%; transition: width 0.4s ease; }
-    .day-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 12px; }
-    .day-dot { aspect-ratio: 1; border-radius: 8px; background: var(--cream); border: 2px solid var(--border); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; color: var(--text-muted); transition: all 0.2s; position: relative; }
-    .day-dot:hover { transform: scale(1.1); border-color: var(--accent); }
-    .day-dot.done { background: var(--accent); border-color: var(--accent); color: white; }
-    .day-dot.done::after { content: '✓'; font-size: 16px; position: absolute; }
-    .day-dot.done > span { visibility: hidden; }
-    .week-labels { display: flex; gap: 6px; }
-    .week-labels span { flex: 1; font-size: 0.72rem; color: var(--text-muted); text-align: center; padding: 2px 0; }
+    /* ── Progress Card — donut ring + streak grid ── */
+    .progress-card { background: var(--white); border-radius: var(--radius); border: 1px solid var(--border); padding: 20px 24px; margin: 24px 20px 0; max-width: var(--max-w); margin-inline: auto; display: flex; align-items: center; gap: 24px; }
+    .progress-ring-wrap { flex-shrink: 0; position: relative; width: 90px; height: 90px; }
+    .progress-ring { transform: rotate(-90deg); }
+    .ring-bg { fill: none; stroke: var(--border); stroke-width: 6; }
+    .ring-fg { fill: none; stroke: var(--accent); stroke-width: 6; stroke-linecap: round; stroke-dasharray: 232.5; stroke-dashoffset: 232.5; transition: stroke-dashoffset 0.5s ease; }
+    .progress-ring-text { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .progress-ring-pct { font-size: 20px; font-weight: 700; color: var(--text-primary); line-height: 1; }
+    .progress-ring-days { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+    .streak-wrap { flex: 1; min-width: 0; }
+    .streak-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+    .streak-title { font-size: 0.85rem; font-weight: 600; }
+    .streak-count { font-size: 0.8rem; color: var(--text-muted); }
+    .streak-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+    .streak-cell { height: 23px; border-radius: 3px; border: none; background: var(--cream); cursor: pointer; font-size: 10px; color: var(--text-muted); transition: background 0.15s; }
+    .streak-cell:hover { background: var(--accent-light); }
+    .streak-cell.done { background: var(--accent); color: white; }
+    .week-row-labels { display: flex; gap: 3px; margin-top: 4px; }
+    .week-row-labels span { flex: 1; font-size: 0.65rem; color: var(--text-muted); text-align: center; }
 
-    /* ── Curriculum Cards ── */
+    /* ── Accordion (Learning Content) ── */
     .week-section { margin-bottom: 32px; }
     .week-section h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid var(--accent); color: var(--accent); }
     .day-card { background: var(--white); border-radius: 10px; border: 1px solid var(--border); margin-bottom: 8px; overflow: hidden; }
@@ -120,19 +127,16 @@
     .type-review     { background: #e0f2fe; color: #075985; }
     .chevron { font-size: 0.8rem; color: var(--text-muted); transition: transform 0.2s; }
     .day-card.open .chevron { transform: rotate(180deg); }
-    .day-card-body { display: none; padding: 0 18px 16px; border-top: 1px solid var(--border); }
+    .day-card-body { display: none; border-top: 1px solid var(--border); }
     .day-card.open .day-card-body { display: block; }
-    .day-card-body ul { margin: 12px 0 12px 18px; color: var(--text-secondary); font-size: 0.9rem; line-height: 1.8; }
-    .day-link { display: inline-flex; align-items: center; gap: 6px; color: var(--accent); font-size: 0.875rem; font-weight: 600; text-decoration: none; padding: 6px 0; }
-    .day-link:hover { text-decoration: underline; }
 
-    /* ── Module overrides (embedded in tab, not full-viewport) ── */
-    .module { min-height: auto !important; padding: 32px 0; border-bottom: 1px solid var(--border); }
+    /* ── Module overrides (embedded in accordion card, not full-viewport) ── */
+    .module { display: block !important; min-height: auto !important; padding: 32px 18px; border: none; }
     .module-inner { max-width: 100%; }
     pre { color: #e0def4; }
     code { color: inherit; }
 
-    /* ── Flashcards ── */
+    /* ── Flashcards (tab) ── */
     .flashcard-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
     .fc { perspective: 800px; height: 180px; cursor: pointer; }
     .fc-inner { position: relative; width: 100%; height: 100%; transition: transform 0.5s; transform-style: preserve-3d; }
@@ -143,7 +147,7 @@
     .fc-term { font-weight: 700; font-size: 1.05rem; margin-bottom: 8px; }
     .fc-hint { font-size: 0.8rem; color: var(--text-muted); margin-top: auto; }
 
-    /* ── Quiz ── */
+    /* ── Quiz (tab) ── */
     .quiz-block { background: var(--white); border-radius: var(--radius); border: 1px solid var(--border); padding: 24px; margin-bottom: 20px; }
     .quiz-q { font-weight: 600; margin-bottom: 16px; line-height: 1.5; }
     .quiz-opts { display: flex; flex-direction: column; gap: 8px; }
@@ -156,7 +160,7 @@
 
     /* ── Diagrams ── */
     .diagram-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
-    .diagram-card { background: var(--white); border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; }
+    .diagram-card { background: var(--white); border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; cursor: pointer; }
     .diagram-card img { width: 100%; height: 200px; object-fit: contain; background: white; padding: 12px; }
     .diagram-label { padding: 12px 16px; font-weight: 600; font-size: 0.9rem; border-top: 1px solid var(--border); }
 
@@ -203,43 +207,54 @@
   <button class="install-btn-hero" id="install-btn-hero">📲 Install App</button>
 </div>
 
-<!-- ── Progress Card ── -->
+<!-- ── Progress Card — donut ring + streak grid ── -->
 <div class="progress-card">
-  <div class="progress-header">
-    <h3>Your Progress</h3>
-    <span class="progress-count" id="progress-text">0 / DAY_COUNT days</span>
+  <div class="progress-ring-wrap">
+    <svg class="progress-ring" width="90" height="90" viewBox="0 0 90 90">
+      <circle class="ring-bg" cx="45" cy="45" r="37"/>
+      <circle class="ring-fg" id="progress-ring-fg" cx="45" cy="45" r="37"/>
+    </svg>
+    <div class="progress-ring-text">
+      <span class="progress-ring-pct" id="progress-pct">0%</span>
+      <span class="progress-ring-days" id="progress-ring-days">0 / DAY_COUNT</span>
+    </div>
   </div>
-  <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
-  <div class="day-grid" id="day-grid"></div>
-  <div class="week-labels">WEEK_LABELS_HTML</div>
+  <div class="streak-wrap">
+    <div class="streak-header">
+      <span class="streak-title">Daily Progress</span>
+      <span class="streak-count" id="streak-count">0 / DAY_COUNT days</span>
+    </div>
+    <div class="streak-grid" id="day-grid"></div>
+    <div class="week-row-labels">WEEK_LABELS_HTML</div>
+  </div>
 </div>
 
 <main>
-  <!-- ── 1. Learning Content ── -->
+  <!-- ── 1. Learning Content (accordion, lazy-loaded per card) ── -->
   <section class="section active container" id="section-modules" aria-labelledby="tab-modules">
     <div id="modules-container"></div>
-    <div class="empty-state" id="modules-loading">Loading modules…</div>
+    <div class="empty-state" id="modules-loading">Loading…</div>
   </section>
 
-  <!-- ── 3. Diagrams ── -->
+  <!-- ── 2. Diagrams ── -->
   <section class="section container" id="section-diagrams" aria-labelledby="tab-diagrams">
     <h2 class="section-heading">Diagrams</h2>
     <div class="diagram-grid" id="diagram-grid"></div>
   </section>
 
-  <!-- ── 4. Flashcards ── -->
+  <!-- ── 3. Flashcards ── -->
   <section class="section container" id="section-flashcards" aria-labelledby="tab-flashcards">
     <h2 class="section-heading">Flashcards</h2>
     <div class="flashcard-grid" id="flashcard-grid"><p class="empty-state">Loading…</p></div>
   </section>
 
-  <!-- ── 5. Quiz ── -->
+  <!-- ── 4. Quiz ── -->
   <section class="section container" id="section-quiz" aria-labelledby="tab-quiz">
     <h2 class="section-heading">Knowledge Check</h2>
     <div id="quiz-container"><p class="empty-state">Loading…</p></div>
   </section>
 
-  <!-- ── 6. Resources ── -->
+  <!-- ── 5. Resources ── -->
   <section class="section container" id="section-resources" aria-labelledby="tab-resources">
     <h2 class="section-heading">Resources</h2>
     RESOURCES_HTML
@@ -248,11 +263,15 @@
 </main>
 
 <script>
-/* ── Configuration: replace these four values per course ── */
-const DAY_COUNT    = NUMBER_OF_DAYS;                   /* integer, e.g. 15 */
-const MODULE_FILES = MODULE_FILES_JSON;                /* array of strings, e.g. ['modules/01-intro.html', ...] */
-const DIAGRAM_FILES = DIAGRAM_FILES_JSON;              /* array of strings, e.g. ['diagrams/overview.svg'] or [] */
-const STORAGE_KEY  = 'COURSE_STORAGE_KEY';             /* unique string, e.g. 'course-ai-agents-progress' */
+/* ── Configuration: replace all tokens per course ── */
+const DAY_COUNT     = NUMBER_OF_DAYS;       /* integer, e.g. 21 */
+const MODULE_FILES  = MODULE_FILES_JSON;    /* array of file paths, e.g. ['modules/01-intro.html', ...] */
+const MODULE_TITLES = MODULE_TITLES_JSON;   /* array of day title strings, e.g. ['What is an AI Agent?', ...] */
+const MODULE_TYPES  = MODULE_TYPES_JSON;    /* array of type strings per day: 'foundations'|'concepts'|'advanced'|'project'|'review' */
+const WEEK_NAMES    = WEEK_NAMES_JSON;      /* array of week headings, e.g. ['🧠 Week 1: Foundations', ...] */
+const WEEK_RANGES   = WEEK_RANGES_JSON;     /* array of [startIdx, endIdx] pairs (0-based), e.g. [[0,6],[7,13],[14,20]] */
+const DIAGRAM_FILES = DIAGRAM_FILES_JSON;   /* array of SVG paths, e.g. ['diagrams/overview.svg'] or [] */
+const STORAGE_KEY   = 'COURSE_STORAGE_KEY'; /* unique string, e.g. 'course-ai-agents-progress' */
 
 /* ── Tab switching ── */
 const tabs     = document.querySelectorAll('.tab-btn');
@@ -265,26 +284,24 @@ tabs.forEach(btn => {
     sections.forEach(s => s.classList.remove('active'));
     btn.classList.add('active');
     document.getElementById('section-' + btn.dataset.tab).classList.add('active');
-    if (btn.dataset.tab === 'modules'    && !modulesLoaded) { await loadModules(); modulesLoaded = true; }
+    if (btn.dataset.tab === 'modules'    && !modulesLoaded) { loadModules(); modulesLoaded = true; }
     if (btn.dataset.tab === 'flashcards') loadFlashcards();
     if (btn.dataset.tab === 'quiz')       loadQuiz();
     if (btn.dataset.tab === 'diagrams')   renderDiagrams();
   });
 });
 
-/* ── Day grid + progress ── */
+/* ── Day grid + donut ring progress ── */
 function buildDayGrid() {
   const grid = document.getElementById('day-grid');
   const done = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
   for (let i = 1; i <= DAY_COUNT; i++) {
-    const dot = document.createElement('button');
-    dot.className = 'day-dot' + (done.includes(i) ? ' done' : '');
-    const span = document.createElement('span');
-    span.textContent = i;
-    dot.appendChild(span);
-    dot.title = 'Day ' + i;
-    dot.addEventListener('click', () => toggleDay(i, dot));
-    grid.appendChild(dot);
+    const cell = document.createElement('button');
+    cell.className = 'streak-cell' + (done.includes(i) ? ' done' : '');
+    cell.textContent = i;
+    cell.title = 'Day ' + i;
+    cell.addEventListener('click', () => toggleDay(i, cell));
+    grid.appendChild(cell);
   }
   updateProgress(done.length);
 }
@@ -297,46 +314,134 @@ function toggleDay(n, el) {
   updateProgress(done.length);
 }
 function updateProgress(count) {
-  document.getElementById('progress-text').textContent = count + ' / ' + DAY_COUNT + ' days';
-  document.getElementById('progress-fill').style.width = (count / DAY_COUNT * 100) + '%';
+  const pct = DAY_COUNT ? Math.round(count / DAY_COUNT * 100) : 0;
+  const circ = 232.5; /* 2 * π * r=37 */
+  document.getElementById('progress-pct').textContent = pct + '%';
+  document.getElementById('progress-ring-days').textContent = count + ' / ' + DAY_COUNT;
+  document.getElementById('progress-ring-fg').style.strokeDashoffset = circ - (circ * pct / 100);
+  document.getElementById('streak-count').textContent = count + ' / ' + DAY_COUNT + ' days';
 }
 buildDayGrid();
 
-/* ── Curriculum card toggle ── */
-document.querySelectorAll('.day-card-header').forEach(h => {
-  h.addEventListener('click', () => h.closest('.day-card').classList.toggle('open'));
-});
-
-/* ── Lazy-load modules ── */
-async function loadModules() {
+/* ── Build accordion + lazy-load each card on click ── */
+function loadModules() {
   const container = document.getElementById('modules-container');
   const loading   = document.getElementById('modules-loading');
-  for (const file of MODULE_FILES) {
-    try {
-      const resp = await fetch(file);
-      if (resp.ok) {
-        const div = document.createElement('div');
-        div.innerHTML = await resp.text();
-        container.appendChild(div);
-      }
-    } catch(e) { console.warn('Failed to load', file); }
-  }
+
+  WEEK_RANGES.forEach(([start, end], wi) => {
+    const section = document.createElement('div');
+    section.className = 'week-section';
+    section.innerHTML = `<h3>${WEEK_NAMES[wi]}</h3>`;
+
+    for (let i = start; i <= end; i++) {
+      const title = MODULE_TITLES[i] || ('Day ' + (i + 1));
+      const type  = MODULE_TYPES[i]  || '';
+      const card  = document.createElement('div');
+      card.className = 'day-card';
+      card.innerHTML = `
+        <div class="day-card-header">
+          <span class="day-card-title">Day ${i + 1} — ${title}</span>
+          <div class="day-card-meta">
+            ${type ? `<span class="day-type type-${type}">${type}</span>` : ''}
+            <span class="chevron">▾</span>
+          </div>
+        </div>
+        <div class="day-card-body"></div>`;
+
+      let loaded = false;
+      const header = card.querySelector('.day-card-header');
+      const body   = card.querySelector('.day-card-body');
+
+      header.addEventListener('click', async () => {
+        const opening = !card.classList.contains('open');
+        card.classList.toggle('open');
+        if (opening && !loaded) {
+          body.innerHTML = '<p style="padding:16px;color:var(--text-muted)">Loading…</p>';
+          try {
+            const resp = await fetch(MODULE_FILES[i]);
+            if (resp.ok) {
+              body.innerHTML = await resp.text();
+              loaded = true;
+              /* Init interactive elements in the newly loaded content */
+              if (typeof initIndexQuizzes === 'function') initIndexQuizzes();
+              if (typeof initChatWindows  === 'function') initChatWindows();
+              setupChatAutoPlay(body);
+            } else {
+              body.innerHTML = '<p style="padding:16px;color:var(--text-muted)">Content not found.</p>';
+            }
+          } catch(e) {
+            body.innerHTML = '<p style="padding:16px;color:var(--text-muted)">Failed to load.</p>';
+          }
+        }
+      });
+
+      section.appendChild(card);
+    }
+    container.appendChild(section);
+  });
+
   loading.style.display = 'none';
-  if (typeof initIndexQuizzes === 'function') initIndexQuizzes();
-  if (typeof initChatWindows === 'function') initChatWindows();
-  container.querySelectorAll('pre').forEach(pre => {
-    const btn = document.createElement('button');
-    btn.textContent = 'Copy'; btn.className = 'copy-btn-overlay';
-    btn.addEventListener('click', () => {
-      navigator.clipboard.writeText((pre.querySelector('code') || pre).textContent);
-      btn.textContent = 'Copied!';
-      setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
-    });
-    pre.style.position = 'relative'; pre.appendChild(btn);
+}
+loadModules();
+modulesLoaded = true;
+
+/* ── Chat auto-play: advances messages automatically when window scrolls into view ── */
+function setupChatAutoPlay(container) {
+  container.querySelectorAll('.chat-window').forEach(win => {
+    if (win.dataset.autoplay) return;
+    win.dataset.autoplay = '1';
+    const nextBtn = win.querySelector('.chat-next-btn');
+    if (!nextBtn) return;
+    const total = win.querySelectorAll('[data-msg]').length;
+    let shown = 0;
+
+    const obs = new IntersectionObserver(entries => {
+      if (!entries[0].isIntersecting) return;
+      obs.disconnect();
+      function advance() {
+        if (shown >= total) return;
+        nextBtn.click();
+        shown++;
+        setTimeout(advance, 1600);
+      }
+      setTimeout(advance, 600);
+    }, { threshold: 0.3 });
+
+    obs.observe(win);
   });
 }
 
-/* ── Flashcards ── */
+/* ── Module interactive elements (event delegation for lazy-loaded content) ── */
+
+/* Standalone .flashcard flip (main.js only handles .flashcard-deck) */
+document.addEventListener('click', function(e) {
+  const card = e.target.closest('.flashcard');
+  if (card && !card.closest('.flashcard-deck')) card.classList.toggle('flipped');
+});
+
+/* .quiz-option immediate feedback on click */
+document.addEventListener('click', function(e) {
+  const btn = e.target.closest('.quiz-option');
+  if (!btn) return;
+  const card = btn.closest('.quiz-card');
+  if (!card || card.classList.contains('answered')) return;
+  card.classList.add('answered');
+  const correct = btn.dataset.correct === 'true';
+  card.querySelectorAll('.quiz-option').forEach(o => {
+    if (o.dataset.correct === 'true') o.classList.add('correct');
+    else if (o === btn) o.classList.add('incorrect');
+  });
+  const explanation = correct ? btn.dataset.explanationCorrect : btn.dataset.explanationWrong;
+  if (explanation) {
+    const fb = document.createElement('p');
+    fb.className = 'quiz-feedback';
+    fb.style.cssText = `background:${correct ? '#d1fae5' : '#fee2e2'};border-left:3px solid ${correct ? '#10b981' : '#ef4444'};color:${correct ? '#065f46' : '#991b1b'};`;
+    fb.textContent = explanation;
+    card.appendChild(fb);
+  }
+});
+
+/* ── Flashcards tab ── */
 let flashcardsLoaded = false;
 async function loadFlashcards() {
   if (flashcardsLoaded) return;
@@ -358,7 +463,7 @@ async function loadFlashcards() {
   } catch(e) { grid.innerHTML = '<p class="empty-state">No flashcards found — add data/flashcards.json</p>'; }
 }
 
-/* ── Quiz ── */
+/* ── Quiz tab ── */
 let quizLoaded = false;
 async function loadQuiz() {
   if (quizLoaded) return;
@@ -391,15 +496,28 @@ async function loadQuiz() {
   quizLoaded = true;
 }
 
-/* ── Diagrams ── */
+/* ── Diagrams tab ── */
 function renderDiagrams() {
   const grid = document.getElementById('diagram-grid');
   if (grid.children.length > 0) return;
   if (!DIAGRAM_FILES.length) { grid.innerHTML = '<p class="empty-state">No diagrams yet — add SVGs to website/diagrams/</p>'; return; }
   DIAGRAM_FILES.forEach(f => {
     const label = f.replace(/.*\//, '').replace(/\.[^.]+$/, '').replace(/-/g, ' ');
-    grid.innerHTML += `<div class="diagram-card"><img src="${f}" alt="${label}" loading="lazy"><div class="diagram-label">${label}</div></div>`;
+    const card = document.createElement('div');
+    card.className = 'diagram-card';
+    card.innerHTML = `<img src="${f}" alt="${label}" loading="lazy"><div class="diagram-label">${label}</div>`;
+    card.addEventListener('click', () => openLightbox(f, label));
+    grid.appendChild(card);
   });
+}
+
+function openLightbox(src, label) {
+  const lb = document.createElement('div');
+  lb.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;cursor:zoom-out;padding:24px;';
+  lb.innerHTML = `<img src="${src}" alt="${label}" style="max-width:100%;max-height:100%;border-radius:8px;box-shadow:0 8px 40px rgba(0,0,0,0.5);">`;
+  lb.addEventListener('click', () => lb.remove());
+  document.addEventListener('keydown', function esc(e) { if (e.key === 'Escape') { lb.remove(); document.removeEventListener('keydown', esc); } });
+  document.body.appendChild(lb);
 }
 
 /* ── PWA install prompt ── */

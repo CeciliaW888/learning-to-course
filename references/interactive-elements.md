@@ -434,20 +434,20 @@ Agent: Here's a summary of today's AI news:
 
 **HTML Template:**
 ```html
-<div class="quiz-card" data-quiz-id="quiz-01">
-  <h3 class="quiz-question">{{question}}</h3>
+<div class="quiz-card">
+  <p class="quiz-question"><strong>Q1:</strong> {{question}}</p>
   <div class="quiz-options">
-    {{#each options}}
-    <button class="quiz-option" data-option-id="{{id}}">
-      <span class="option-letter">{{id}})</span>
-      <span class="option-text">{{text}}</span>
-    </button>
-    {{/each}}
+    <button class="quiz-option" data-correct="false"
+      data-explanation-wrong="{{wrong_explanation}}">{{option_a}}</button>
+    <button class="quiz-option" data-correct="true"
+      data-explanation-correct="{{correct_explanation}}">{{correct_option}}</button>
+    <button class="quiz-option" data-correct="false"
+      data-explanation-wrong="{{wrong_explanation}}">{{option_c}}</button>
   </div>
-  <div class="quiz-feedback" style="display: none;"></div>
-  <div class="quiz-explanation" style="display: none;">{{explanation}}</div>
 </div>
 ```
+
+> Use `data-correct="true"` on the correct answer, `data-correct="false"` on wrong answers. Add `data-explanation-correct` on the correct button and `data-explanation-wrong` on each wrong button. The feedback appears immediately on click via event delegation (see Auto-Initialization Reference).
 
 ### 2. Code Challenge
 
@@ -1532,33 +1532,46 @@ result = agent.<span class="code-function">invoke</span>({<span class="code-stri
 ```html
 <div class="chat-window" id="chat-example">
   <div class="chat-messages">
-    <div class="chat-message" data-msg="1" data-sender="frontend" style="display:none;">
+    <div class="chat-message" data-msg="1" data-sender="1" style="display:none;">
       Hey API, user just clicked "Save" — here's the form data 📦
     </div>
-    <div class="chat-message" data-msg="2" data-sender="api" style="display:none;">
+    <div class="chat-message" data-msg="2" data-sender="2" style="display:none;">
       Got it! Let me validate this... looks good ✅
     </div>
-    <div class="chat-message" data-msg="3" data-sender="database" style="display:none;">
+    <div class="chat-message" data-msg="3" data-sender="3" style="display:none;">
       Saved! Row ID #42 created. Tell the user we're done 👍
     </div>
-    <div class="chat-typing" style="display:none;">
+    <div class="chat-message" data-msg="4" data-sender="1" style="display:none;">
+      Perfect. Showing success message to user now 🎉
+    </div>
+    <div class="chat-typing typing-indicator" style="display:none;">
       <span></span><span></span><span></span>
     </div>
   </div>
   <div class="chat-controls">
-    <button class="chat-next-btn">Next Message</button>
+    <button class="chat-next-btn">Next →</button>
     <button class="chat-all-btn">Show All</button>
     <button class="chat-reset-btn">Reset</button>
   </div>
 </div>
 ```
 
+**`data-sender` color map (MUST use numbers 1–5, not strings):**
+
+| Value | Color | Use for |
+|-------|-------|---------|
+| `"1"` | Terracotta | User / primary actor |
+| `"2"` | Blue | Agent / system response |
+| `"3"` | Green | Tool result / success |
+| `"4"` | Yellow | Thought / reasoning |
+| `"5"` | Purple | External service |
+
 **Key Rules:**
-- Auto-initializes on `.chat-window` elements (needs unique `id`)
-- Messages appear sequentially with typing indicator between them
-- Different `data-sender` values get different bubble colors (via actor colors in CSS)
+- `data-sender` MUST be a number `"1"`–`"5"` — string labels like `"api"` or `"frontend"` produce no background color
+- The typing indicator MUST have BOTH classes: `class="chat-typing typing-indicator"` — CSS uses `.chat-typing` for dot animation, JS uses `.typing-indicator` to show/hide it
+- Auto-plays when scrolled into view (IntersectionObserver in template) — Next/Show All/Reset buttons also work manually
+- Each `.chat-window` needs a unique `id`
 - Use conversational, personality-driven language — components are characters
-- At least one chat animation per course (mandatory)
 
 ---
 
@@ -1758,7 +1771,7 @@ The pre-built `main.js` auto-initializes these elements on page load. No manual 
 | Chat animation | `.chat-window` | Unique `id`, messages with `data-msg` + `data-sender` |
 | Data flow | `.flow-animation` | `data-steps` JSON array |
 | Quiz | `.quiz-card` | Options with `data-correct`, `data-explanation-*` |
-| Flashcard | `.flashcard` | `.flashcard-front` + `.flashcard-back` children |
+| Flashcard | `.flashcard` | `.flashcard-inner` wrapper required — see HTML pattern below |
 | Drag-and-drop | `.dnd-container` | Chips with `data-answer`, zones with `data-correct` |
 | Scroll animation | `.animate-in` | None (optional `--stagger-delay` on children) |
 | Progress tracking | `[data-day]` sections | `data-day` attribute |
@@ -1770,3 +1783,80 @@ The pre-built `main.js` auto-initializes these elements on page load. No manual 
 - `checkBugLine(element, isCorrect)` — check spot-the-bug answer
 - `showLayer(id)` — switch layer toggle view
 - `showArchDesc(element)` — show architecture component description
+
+---
+
+## Flashcard HTML Pattern (Module Files)
+
+Standalone flashcards in modules (not inside `.flashcard-deck`) **must** use `.flashcard-inner` — the CSS `transform-style: preserve-3d` and flip animation are applied to it, not to `.flashcard` directly.
+
+```html
+<div class="flashcard">
+  <div class="flashcard-inner">
+    <div class="flashcard-front">
+      <h4>Front title</h4>
+      <p>Front content</p>
+      <p style="font-size:0.8em;color:var(--color-text-muted)">← Tap to flip →</p>
+    </div>
+    <div class="flashcard-back">
+      <h4>Back title</h4>
+      <p>Back content</p>
+      <p style="font-size:0.8em">← Tap to flip →</p>
+    </div>
+  </div>
+</div>
+```
+
+> **Critical:** Do NOT add `color:` inline styles on any elements inside `.flashcard-back`. The back face sets `color: white` via CSS; inline styles would override it and make text unreadable. The `styles.css` rule `.flashcard-back * { color: white !important }` is a backstop, but avoid inline color overrides in back content.
+
+> **Note:** `main.js`'s `initFlashcards()` only handles `.flashcard-deck` containers. Standalone flashcards need event delegation wired up in `index.html`:
+> ```javascript
+> document.addEventListener('click', function(e) {
+>   const card = e.target.closest('.flashcard');
+>   if (card && !card.closest('.flashcard-deck')) card.classList.toggle('flipped');
+> });
+> ```
+
+---
+
+## Quiz HTML Pattern (Module Files)
+
+Use inline `data-correct` and `data-explanation-*` on each button. This enables immediate feedback without a separate "Check" button.
+
+```html
+<div class="quiz-card">
+  <p class="quiz-question"><strong>Q1:</strong> Question text here?</p>
+  <div class="quiz-options">
+    <button class="quiz-option" data-correct="false"
+      data-explanation-wrong="Why this is wrong.">Option A</button>
+    <button class="quiz-option" data-correct="true"
+      data-explanation-correct="Why this is correct.">Option B</button>
+    <button class="quiz-option" data-correct="false"
+      data-explanation-wrong="Why this is wrong.">Option C</button>
+  </div>
+</div>
+```
+
+> **Note:** `main.js`'s `initQuizzes()` only marks the selected option — it does NOT show feedback automatically. Add event delegation in `index.html` to reveal correct/incorrect state and explanation on click:
+> ```javascript
+> document.addEventListener('click', function(e) {
+>   const btn = e.target.closest('.quiz-option');
+>   if (!btn) return;
+>   const card = btn.closest('.quiz-card');
+>   if (!card || card.classList.contains('answered')) return;
+>   card.classList.add('answered');
+>   const correct = btn.dataset.correct === 'true';
+>   card.querySelectorAll('.quiz-option').forEach(o => {
+>     if (o.dataset.correct === 'true') o.classList.add('correct');
+>     else if (o === btn) o.classList.add('incorrect');
+>   });
+>   const explanation = correct ? btn.dataset.explanationCorrect : btn.dataset.explanationWrong;
+>   if (explanation) {
+>     const fb = document.createElement('p');
+>     fb.className = 'quiz-feedback';
+>     fb.style.cssText = `background:${correct ? 'rgba(74,124,89,0.1)' : 'rgba(200,107,90,0.1)'};border-left:3px solid ${correct ? 'var(--accent-green)' : 'var(--accent-red)'};`;
+>     fb.textContent = explanation;
+>     card.appendChild(fb);
+>   }
+> });
+> ```

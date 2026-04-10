@@ -66,9 +66,18 @@ This is not a "nice to have" — it's a gate. If any check fails, fix it before 
 
 - Always await async cache operations in service worker (`caches.match()` returns a Promise)
 - Include all icon files in pre-cache list
+- Include module HTML files, quiz JSONs, flashcard JSON, and diagram SVGs in PRECACHE_URLS (missing = broken offline)
 - Include Apple meta tags for iOS (`apple-touch-icon`, `apple-mobile-web-app-capable`)
-- Verify every file in `sw.js` PRECACHE_ASSETS actually exists
-- Use pre-built `templates/_base.html` which includes all PWA boilerplate
+- Verify every file in `sw.js` PRECACHE_URLS actually exists
+- Use pre-built `tab-index-template.html` which includes all PWA boilerplate
+
+### Interactive Element Issues
+
+- `.flashcard` requires a `.flashcard-inner` wrapper between itself and `.flashcard-front`/`.flashcard-back` — without it the CSS `transform-style: preserve-3d` chain breaks and the flip animation won't work
+- `.flashcard-back` children must not have `style="color:..."` inline — overrides the white text on dark background; the pre-built styles.css includes `.flashcard-back * { color: white !important }` as the fix
+- Standalone `.flashcard` elements (not inside `.flashcard-deck`) need document-level event delegation for flip — `main.js initFlashcards()` only handles deck containers
+- Quiz options using `data-correct` attribute need event delegation for immediate feedback — `main.js initQuizzes()` only marks selection but does not show explanation text
+- After lazy-loading each accordion card's module HTML, call both `initIndexQuizzes()` and `initChatWindows()` per card — calling once at page load misses content that hadn't been fetched yet
 
 ### Content Generation
 
@@ -502,6 +511,11 @@ Verify all required data exists:
 - [ ] No module file contains `<script src=` external script references
 - [ ] No module file contains `<nav class="day-nav"` navigation (accordion handles this)
 - [ ] Verify: `grep -l "<!DOCTYPE\|<html\|script src=" website/modules/*.html` returns empty
+- [ ] Every `.flashcard` has a `.flashcard-inner` wrapper child: `grep -L "flashcard-inner" website/modules/*.html` must return empty for any file that uses `.flashcard`
+- [ ] No `.flashcard-back` child element has an inline `style` attribute with `color:` — use classes instead
+- [ ] `index.html` has document-level event delegation for standalone flashcard flip (`.flashcard` not inside `.flashcard-deck`)
+- [ ] `index.html` has document-level event delegation for quiz option feedback (`data-correct` attribute → append `.quiz-feedback` explanation)
+- [ ] `index.html` accordion card load handler calls `initIndexQuizzes()` and `initChatWindows()` after each module is injected, not just once on page load
 
 ### GitHub URL Consistency
 - [ ] All GitHub links use same username and repo name

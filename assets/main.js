@@ -873,6 +873,8 @@
   window.showLayer = showLayer;
   window.copyCode = copyCode;
   window.launchConfetti = launchConfetti;
+  window.initChatWindows = initChatWindows;
+  window.initIndexQuizzes = initIndexQuizzes;
 
   /* ------------------------------------------------------------------
      AUTO-INITIALIZE ON DOM READY

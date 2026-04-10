@@ -238,8 +238,8 @@ code { font-family: var(--font-code); font-size: var(--text-sm); color: inherit;
 }
 .quiz-option:hover { border-color: var(--color-accent); background: var(--bg-hover); }
 .quiz-option.selected { border-color: var(--color-accent); background: var(--color-accent-light); }
-.quiz-option.correct { border-color: var(--accent-green); background: rgba(74,124,89,0.1); }
-.quiz-option.incorrect { border-color: var(--accent-red); background: rgba(200,107,90,0.1); }
+.quiz-option.correct { border-color: #10b981; background: #d1fae5; color: #065f46; }
+.quiz-option.incorrect { border-color: #ef4444; background: #fee2e2; color: #991b1b; }
 .quiz-feedback { margin-top: var(--space-4); padding: var(--space-3); border-radius: var(--radius-sm); font-size: var(--text-sm); }
 .quiz-explanation { margin-top: var(--space-3); padding: var(--space-3); background: var(--bg-hover); border-radius: var(--radius-sm); font-size: var(--text-sm); }
 .quiz-controls { margin-top: var(--space-4); display: flex; gap: var(--space-3); }
@@ -249,30 +249,34 @@ code { font-family: var(--font-code); font-size: var(--text-sm); color: inherit;
 }
 
 /* ---------- 12. Flashcards ---------- */
-.flashcard { perspective: 1000px; min-height: 200px; cursor: pointer; }
-.flashcard-inner { position: relative; width: 100%; height: 100%; transition: transform 0.6s; transform-style: preserve-3d; }
+.flashcard { perspective: 1000px; cursor: pointer; }
+/* Grid stacking: both faces share the same cell, sized by tallest child */
+.flashcard-inner { display: grid; width: 100%; transition: transform 0.6s; transform-style: preserve-3d; }
 .flashcard.flipped .flashcard-inner { transform: rotateY(180deg); }
 .flashcard-front, .flashcard-back {
-  position: absolute; width: 100%; height: 100%; backface-visibility: hidden;
+  grid-row: 1; grid-column: 1;
+  min-height: 200px; backface-visibility: hidden;
   border-radius: var(--radius-md); padding: var(--space-8);
-  display: flex; align-items: center; justify-content: center; text-align: center;
+  display: flex; align-items: center; justify-content: center; text-align: center; flex-direction: column;
 }
 .flashcard-front { background: var(--bg-card); border: 2px solid var(--color-accent); }
 .flashcard-back { background: var(--color-accent); color: white; transform: rotateY(180deg); }
+.flashcard-back * { color: white !important; }
 
 /* ---------- 13. Chat Animation ---------- */
 .chat-window { background: var(--bg-card); border-radius: var(--radius-md); border: 1px solid var(--border); overflow: hidden; margin: var(--space-6) 0; }
 .chat-messages { padding: var(--space-4); min-height: 200px; display: flex; flex-direction: column; gap: var(--space-3); }
 .chat-message {
-  max-width: 80%; padding: var(--space-3) var(--space-4);
+  max-width: 85%; padding: var(--space-3) var(--space-4);
   border-radius: 16px; font-size: var(--text-sm); line-height: 1.5;
-  animation: fadeIn 0.3s ease-out;
+  color: var(--text-primary);
 }
-.chat-message[data-sender="1"], .chat-message:nth-child(odd) { background: var(--color-accent-light); align-self: flex-start; border-bottom-left-radius: 4px; }
-.chat-message[data-sender="2"], .chat-message:nth-child(even) { background: rgba(91,143,163,0.12); align-self: flex-end; border-bottom-right-radius: 4px; }
-.chat-message[data-sender="3"] { background: rgba(74,124,89,0.12); align-self: flex-start; border-bottom-left-radius: 4px; }
-.chat-message[data-sender="4"] { background: rgba(184,134,11,0.12); align-self: flex-end; border-bottom-right-radius: 4px; }
-.chat-message[data-sender="5"] { background: rgba(139,94,131,0.12); align-self: flex-start; border-bottom-left-radius: 4px; }
+.chat-message[data-sender="1"] { background: #fce4cc; align-self: flex-start; border-bottom-left-radius: 4px; }
+.chat-message[data-sender="2"] { background: #d6eaf3; align-self: flex-end; border-bottom-right-radius: 4px; }
+.chat-message[data-sender="3"] { background: #d4eadb; align-self: flex-start; border-bottom-left-radius: 4px; }
+.chat-message[data-sender="4"] { background: #faecc8; align-self: flex-end; border-bottom-right-radius: 4px; }
+.chat-message[data-sender="5"] { background: #ead4e5; align-self: flex-start; border-bottom-left-radius: 4px; }
+.chat-message.chat-enter { animation: slideInUp 0.3s ease-out; }
 .chat-typing { display: flex; gap: 4px; padding: var(--space-3); align-self: flex-start; }
 .chat-typing span { width: 8px; height: 8px; background: var(--text-muted); border-radius: 50%; animation: pulse 1.4s infinite; }
 .chat-typing span:nth-child(2) { animation-delay: 0.2s; }
@@ -476,6 +480,7 @@ code { font-family: var(--font-code); font-size: var(--text-sm); color: inherit;
 
 /* ---------- 30. Animations ---------- */
 @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slideInUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
 @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
 .fade-in { animation: fadeIn 0.5s ease-out; }
